@@ -41,7 +41,7 @@ MEDIA_ROOT = '/usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = ''
-
+    
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
@@ -69,6 +69,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/var/www/media/templates',
 )
 
 INSTALLED_APPS = (
@@ -77,4 +78,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',    
+    'codechecker.contests',
 )
+
+
+#Codecheker specific Changes 
+LOGIN_URL = '/site/login/'
+LOGIN_REDIRECT_URL = '/site/'
