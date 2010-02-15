@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<table width="100%"> 
+<tr> <td> <b>Problem</b> </td> <td> <b>Time Limit</b> </td> <td> <b>Memory Limit</b> </td> </tr>
+{% for problem in problems %}
+    <tr>
+        <td> <a href='/home/problems/{{ problem.pcode }}/'> {{ problem.pcode }} </a> </td>
+        <td> {{ problem.tlimit }}</td>
+        <td> {{ problem.mlimit }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% if pages|add:"-1" %}
+<table width="75%">
+<tr>
+<td align="left">
+    {% if prev %} <a href='/home/problems/page/{{ page|add:"-1" }}/'> <<<Previous </a> {% endif %}
+</td>
+<td align="right">
+    {% if prev %} <a href='/home/problems/page/{{ page|add:"1" }}/'> Next>>> </a> {% endif %}
+</td>
+</tr>
+</table>
+{% endif %}
+{% endblock %}

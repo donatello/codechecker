@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+
+<!-- change this to the title you want to appear in browser title bar -->
+
+<title> Codelabs </title >
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="author" content="suren" />
+<meta name="description" content="Codelabs checker default " />
+<link rel="stylesheet" href="/media/css/style.css" type="text/css" />
+</head>
+
+<body>
+
+<div id="navcontainer">
+    <!-- the title that appear in the page header -->
+    <div id="title"> <a href="/site/"> CodeLabs </a></div>
+        <ul id="navlist">
+        
+            {% block side_bar %} 
+                <!-- put your navigation links and text here -->
+                <li><a href="/site/">Home</a></li>
+                <li><a href="/site/contests/">Contests</a></li>
+                <li><a href="/site/problems/">Problems</a></li>
+                <li><a href="/site/reference/">References</a></li>
+                <li><a href="/site/about/">About</a></li>
+                <!-- end navigation -->
+                {% if user.is_authenticated %}
+                <li> <a href="/site/logout/"> Logout </a> </li>
+                {% endif %}
+
+            {% endblock %}
+            
+        </ul>    
+    </div>
+
+</div>
+
+<div id="wrap">
+    <div id="container">
+        <div class="content">
+            <!-- here is your page content -->
+            <div id='breadcrumbs'>
+                <div id="greeting">
+                    {% if user.is_authenticated %}
+                    Welcome, <a href="#"> {{ user.username }} </a>!
+                    {% else %}
+                    Hello There! Please <a href="/site/login/"> Log in </a>.
+                    {% endif %}
+                </div>
+                You are Here: 
+                {% block breadcrumbs %} 
+                <a href='/site/'> Home </a><span class="closer">>></span>  
+                {% endblock %}        
+            </div>
+
+            <div class="content"> 
+                {% block main_content %} 
+                <h3>
+                    Welcome to CodeLabs !     
+                </h3>
+                <div> <i> The Way Geeks Have fun </i> </div>
+                <br>
+                <div> 
+                    Codelabs is an automated judge system to run programming contests. It has a mechanism to submit problem solutions, have them judged fully automatically and provides a (web)interfaces for teams, the jury and the general public. ( Shamelessly flicked from DomJudge Intro) 
+                </div> 
+                <br> 
+                <div>
+                    Seems easy? Not when you have the best brains in the world competing with you, racing against the clock to try and win over our online tester with their compact and efficient codes.
+                </div>
+                {% endblock %}
+            </div>
+            <br>
+        </div>
+
+
+
+        <div id="footer"><br />
+            &copy; Codelabs Team &reg; 2010
+        </div>
+    </div>
+</div>
+
+<div id='header'> </div>
+</body>
+</html>
