@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     # default Generic Views
     (r'^$', 'codechecker.generic_views.default'),
     (r'^about/', 'codechecker.generic_views.default', { 'action' : 'about'}),
-    (r'^reference/', 'codechecker.generic_views.default', { 'action' : 'references'}),
+    (r'^references/', 'codechecker.generic_views.default', { 'action' : 'references'}),
     
     # User Related Views
     (r'login/$', auth_views.login, { 'template_name' : 'accounts/login.html', }),
