@@ -27,7 +27,7 @@ class Contest(models.Model):
 
     def __unicode__(self):
         return self.title
-
+    
     
 class Team(models.Model):
     name = models.CharField(max_length=25)

@@ -9,6 +9,18 @@
 <meta name="author" content="suren" />
 <meta name="description" content="Codelabs checker default " />
 <link rel="stylesheet" href="/media/css/style.css" type="text/css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/datatable/assets/skins/sam/datatable.css" />
+
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/dragdrop/dragdrop-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/datasource/datasource-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/datatable/datatable-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/event/event-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/connection/connection-min.js"></script>
+
 </head>
 
 <body>
@@ -54,15 +66,24 @@
                 <a href='/site/'> Home </a><span class="closer">>></span>  
                 {% endblock %}        
             </div>
-
-            <div class="content"> 
-                {% block main_content %} 
+            <div class="header">
+                {% block header %}
                 <h3>
                     Welcome to CodeLabs !     
                 </h3>
-                <div> <i> The Way Geeks Have fun </i> </div>
-                <br>
-                <div> 
+                <i> The Way Geeks Have fun </i>
+                {% endblock %}
+            </div>
+            <div class="links">
+                {% block links %}
+
+                {% endblock %}
+            </div>
+
+            <div class="content"> 
+                {% block main_content %} 
+                <div>
+                    <br>
                     Codelabs is an automated judge system to run programming contests. It has a mechanism to submit problem solutions, have them judged fully automatically and provides a (web)interfaces for teams, the jury and the general public. ( Shamelessly flicked from DomJudge Intro) 
                 </div> 
                 <br> 

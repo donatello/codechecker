@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h3> {{ category }} </h3> 
+{% endblock %}
+
+{% block main_content %}
+
+<table id="{{category}}"> 
+    <thead><tr>
+        {% for col in coloums %}
+        <th scope="col"> {{ col.name }} </th>    
+        {% empty %}
+        {% endfor %}
+    </tr></thead>
+    {% for rowItem in rows %}
+    <tr class="{% cycle "odd" "even" %}">
+        {% for col in rowItem %}
+        <td> 
+            {% if col.link %} 
+            <a href="{{ col.link }}">{{ col.value }}</a>
+            {% else %}
+            {{ col.value }}
+            {% endif %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% empty %} 
+    {% endfor %}
+</table>
+{% endblock %}
+

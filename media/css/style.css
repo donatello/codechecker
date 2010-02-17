@@ -14,6 +14,10 @@ body{
     float:left;
 }
 
+.header{
+    text-align: center;
+}
+
 #wrap{
 }
 
@@ -70,7 +74,7 @@ h3{
 }
 
 .content{
-    padding:21px;
+    padding: 21px;
     text-align:justify;
     font: 9pt/14pt 'Lucida Grande', Verdana, Helvetica, sans-serif;
     min-height: 400px;  

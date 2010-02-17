@@ -1,0 +1,24 @@
+{% extends 'table.html' %}
+
+{% block header %}
+<h3> Contest: {{ title }} </h3>
+{% endblock %}
+
+{% block links %}
+<div class="links">
+    <a href = "/site/contests/{{ contest }}/description/">Description</a>
+    <a href = "/site/contests/{{ contest }}/problems">Problems</a>
+    <a href = "/site/contests/{{ contest }}/ranklist">Ranklist</a>
+    <a href = "/site/contests/{{ contest }}/submissions">Submissions</a>
+</div>
+{% endblock %}
+
+{% block main_content %}
+{% ifequal section "description" %}
+{{ description }}
+{% endifequal %}
+{% ifnotequal section "description" %}
+{{ block.super }}
+{% endifnotequal %}
+
+{% endblock %}
