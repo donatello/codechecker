@@ -28,7 +28,7 @@ def show_all_contests(request, page=1):
     except (EmptyPage, InvalidPage):
         paginated_contests = pagination.page(pagination.num_pages)
     
-    vars['coloums'] = [ {'name' : 'Contest'} , {'name' : 'Start Time'} , {'name': 'End Time'} ]
+    vars['columns'] = [ {'name' : 'Contest'} , {'name' : 'Start Time'} , {'name': 'End Time'} ]
     
     contests = paginated_contests.object_list
 
