@@ -40,6 +40,7 @@ def show_all_contests(request, page=1):
         rowItem.append( { 'value' : format_time(contest['endDateTime']) })
         rows.append(rowItem)
     vars['rows'] = rows
+    vars['page'] = paginated_contests
     template = loader.get_template('table.html')    
     context = Context(request, vars)
     return HttpResponse(template.render(context))
@@ -51,15 +52,48 @@ def show_contest(request, contest_id, action='description'):
     vars['section'] = action 
     vars['description'] = contest.description
     vars['title'] = contest.title
+
+    if action == 'problems' :
+        problem_vars =  show_all_problems(request, contest)
+        vars.update(problem_vars) 
+    
     context = Context(request, vars)
     template = loader.get_template('contest.html')
     return HttpResponse(template.render(context))
 
-def show_problem(request):
-    return HttpResponse('show_problem')
+def show_problem(request, problem_id):
+    return HttpResponse("Show Problem")
 
-def show_all_problems(request):
-    return HttpResponse('show_all_problems')
+def show_all_problems(request, contest = -1):
+    vars = { }
+    vars['category'] = 'Problems'
+    vars['columns'] = [{'name' : 'Problem'} , {'name' : 'Maximum Points'}]
+
+    if contest == -1 :
+        problems =  Problem.objects.all().values( 'pk', 'contest', 'problemCode', 'maxScore' )
+        vars['columns'].append( {'name' : "Contest" })
+    else :
+        problems =  Problem.objects.filter(contest=contest).values( 'pk', 'problemCode', 'maxScore' )
+
+    rows = []
+    for problem in problems :
+        rowItem = []
+        rowItem.append( { 'link' : '/site/problems/' + str(problem['pk']) +'/', 'value': problem['problemCode'] })
+        rowItem.append( { 'value' : problem['maxScore']} )
+        
+        if contest == -1 :
+            this_contest = Contest.objects.get(pk=problem['contest']) 
+            rowItem.append( { 'link' : '/site/contests/' + str(this_contest.pk) +'/', 'value' : this_contest.title } )  
+        
+        rows.append(rowItem)
+    vars['rows'] = rows
+
+    if contest != -1 :
+        return vars
+
+    context = Context(request, vars)
+    template = loader.get_template('table.html')
+    return HttpResponse(template.render(context))
 
 def problems_default(request):
-    return HttpResponse('problems_default')
+    return HttpResponsePermanentRedirect("/site/problems/all/");
