@@ -62,21 +62,27 @@ h1{
 }
 
 h2{
-    font-size: 22px;
+    font-size: 23px;
     font-weight: bold;
     color: #275A78;
 }
 
 h3{
-    font-size:18px;
+    font-size:21px;
     font-weight:bold;
     color: #275A78;
 }
 
-.content{
-    padding: 21px;
-    text-align:justify;
-    font: 9pt/14pt 'Lucida Grande', Verdana, Helvetica, sans-serif;
+.content {
+    padding: 10px;
+    text-align: justify;
+    font: 9pt/14pt;
+}
+
+.main_content{
+    padding: 30px;
+    text-align: left;
+    font: 11pt/14pt 'Lucida Grande', Verdana, Helvetica, sans-serif;
     min-height: 400px;  
 }
 
@@ -133,3 +139,54 @@ h3{
 }
 
 /* Data Table Content*/
+.zebra{
+    border-collapse:collapse;
+    font-size:12px;
+    text-align:center;
+    width: 70%;
+}
+
+.zebra th{
+    color:#cccccc;
+    background: #555555;
+    font-size:14px;
+    font-weight: bold;
+    padding:10px 8px;
+}
+
+.zebra td{
+    color:#666699;
+    padding:8px;
+}
+
+.zebra .odd{
+    background: #F4DDB1 none repeat scroll 0 0;
+}
+
+.zebra a{
+    text-decoration: none;
+    font-size: 1.2em;
+}
+
+/* Links */
+#links{
+    padding-top: 10px;
+    text-align: center;
+}
+
+#links a{
+    -moz-background-clip:border;
+    -moz-background-inline-policy:continuous;
+    -moz-background-origin:padding;
+    background:#555555 none repeat scroll 0 0;
+    color:#CCCCCC;
+    font-size:14px;
+    font-weight:bold;
+    padding:10px 8px;
+    text-decoration: none;
+}
+
+#links .selected{
+    color: #555555;
+    background: #CCCCCC;
+}

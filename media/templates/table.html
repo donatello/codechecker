@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block main_content %}
-
-<table id="{{category}}"> 
+<center>
+<table id="{{category}}" class="zebra"> 
     <thead><tr>
         {% for col in coloums %}
         <th scope="col"> {{ col.name }} </th>    
@@ -28,5 +28,6 @@
     {% empty %} 
     {% endfor %}
 </table>
+</center>
 {% endblock %}
 
