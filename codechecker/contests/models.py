@@ -14,6 +14,7 @@ LANG_TYPES = (
 RESULT_TYPES = (
     ('QU', 'QUEUED'),
     ('CMP', 'COMPILING'),
+    ('CMPE', 'COMPILATION FAILURE'),
     ('RUN', 'RUNNING'),
 )
 
@@ -62,7 +63,7 @@ class Submission(models.Model):
     submissionCode = models.TextField()    
     
     def __unicode__(self):
-        return self.pk
+        return self.pk    
 
     # The prefix underscore implies that the function is not an
     # exported interface (i think).
@@ -71,11 +72,11 @@ class Submission(models.Model):
         file_root = RUNS_PATH + str(self.pk) 
 
         if self.get_submissionLang_display() == 'C++':
-            s = ('g++  -o ' + str(file_root)  + '.exe ' + 
+            s = ('g++  -Wall -o ' + str(file_root)  + '.exe ' + 
                  str(str(file_root) + '.' + sub['lang']))
 
         elif self.get_submissionLang_display() == 'C':
-            s = ('gcc  -o ' + str(file_root)  + '.exe ' + 
+            s = ('gcc  -Wall -o ' + str(file_root)  + '.exe ' + 
                  str(str(file_root) + '.' + sub['lang']))
 
         elif self.get_submissionLang_display() == 'JAVA':
@@ -83,9 +84,16 @@ class Submission(models.Model):
 
         return s
 
+    def _get_filename_extension(self):
+        if self.get_submissionLang_display() == 'C++':
+            return "cpp"
+        elif self.get_submissionLang_display() == 'C':
+            return "c"
+        elif self.get_submissionLang_display() == 'JAVA':
+            return "java"
 
     def write_code_to_disk(self):
-        f = open(RUNS_PATH + str(self.pk) + '.' + sub_instance.lang,'w')
+        f = open(RUNS_PATH + str(self.pk) + '.' + self._get_filename_extension(),'w')
         f.write(self.submissionCode)
         f.close()
 
@@ -93,13 +101,14 @@ class Submission(models.Model):
         cmd = _generate_compile_command()
         self.result = 'CMP'
         self.save()
-        compile_output = os.popen(submission['cmd'])
-        return compiler_out.read()
+        compile = os.popen(cmd, shell=True, stderr=submission.PIPE)
+        compile_out = compile.communicate()[1]
+        return compile_out
         
     def check_compile_result(self):
-        if os.path.exists(RUNS_PATH + str(sub_instance.ID) + '.exe') == 0 :
-            sub_instance.result = 'CMPE'
-            sub_instance.save()
+        if os.path.exists(RUNS_PATH + str(self.pk) + '.exe') == 0:
+            self.result = 'CMPE'
+            self.save()
             return False
         return True
     

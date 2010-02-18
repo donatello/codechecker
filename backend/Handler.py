@@ -15,18 +15,13 @@ def log(msg):
     a.write(msg + '\n')
     return
 
-def generate_compile_command(sub):
-    s = str('')
-    file_root = RUNS_PATH + str(sub['ID']) 
+def handle_simple_checker(submission):
+    tests = Testcase.objects.get().filter(problem=submission.problem)
     
-    if sub['lang'] == 'cpp':
-        s = 'g++  -o '+ str(file_root)  + '.exe ' + str(str(file_root) + '.' + sub['lang'])
-    elif sub['lang'] == 'c':
-        s = 'gcc  -o ' + str(file_root)  + '.exe ' + str(str(file_root) + '.' + sub['lang'])
-    elif sub['lang'] == 'java':
-        s = 'do nothing for now '
-    return s
+    
 
+    SimpleChecker.run(submission)
+    
 
 # The 'submission' argument is a model-instance (not a dictionary).
 def handle_submission( submission ):
@@ -48,15 +43,10 @@ def handle_submission( submission ):
 
     # Run the submission's generated executable.
     prob = Problem.objects.get(ID=submission.problem)
-    submission.execute(prob)
-    
-    if prob.ptype == 'Simple' :
-        SimpleChecker.run(submission)
         
-    elif prob.ptype == 'Multiple' :
-        MultipleChecker.run(submission)
-    elif prob.ptype == 'Complex' :
-        ComplexChecker.run(submission)
-    
-    return
-    
+    if prob.ptype == 'Simple':
+        handle_simple_checker(submission)
+#    elif prob.ptype == 'Multiple' :
+#        MultipleChecker.run(submission)
+#    elif prob.ptype == 'Complex' :
+#        ComplexChecker.run(submission)
