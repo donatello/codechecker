@@ -18,7 +18,7 @@ RESULT_TYPES = (
     ('RUN', 'RUNNING'),
 )
 
-RUNS_PATH = '/share/data/submissions/'
+RUNS_PATH = '/tmp/'
 
 class Contest(models.Model):
     title = models.CharField(max_length = 25)
@@ -73,11 +73,11 @@ class Submission(models.Model):
 
         if self.get_submissionLang_display() == 'C++':
             s = ('g++  -Wall -o ' + str(file_root)  + '.exe ' + 
-                 str(str(file_root) + '.' + sub['lang']))
+                 str(str(file_root) + '.' + self._get_filename_extension()))
 
         elif self.get_submissionLang_display() == 'C':
             s = ('gcc  -Wall -o ' + str(file_root)  + '.exe ' + 
-                 str(str(file_root) + '.' + sub['lang']))
+                 str(str(file_root) + '.' + self._get_filename_extension()))
 
         elif self.get_submissionLang_display() == 'JAVA':
             s = 'do nothing for now '
@@ -98,31 +98,21 @@ class Submission(models.Model):
         f.close()
 
     def compile(self):
-        cmd = _generate_compile_command()
+        import subprocess
+        cmd = self._generate_compile_command()
         self.result = 'CMP'
         self.save()
-        compile = os.popen(cmd, shell=True, stderr=submission.PIPE)
+        compile = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
         compile_out = compile.communicate()[1]
         return compile_out
         
     def check_compile_result(self):
+        import os
         if os.path.exists(RUNS_PATH + str(self.pk) + '.exe') == 0:
             self.result = 'CMPE'
             self.save()
             return False
         return True
-    
-    # This method should only be called if self.check_compile_result()
-    # returned True
-    def execute(self, prob):   
-        if prob.ptype == 'Simple' :
-            import SimpleChecker # SUREN --> This line wont work
-                                 # because of the folder arrangement!
-            SimpleChecker.run(self)            
-#        elif prob.ptype == 'Multiple' :
-#            MultipleChecker.run(self)
-#        elif prob.ptype == 'Complex' :
-#            ComplexChecker.run(self)
 
 
 class TestCase(models.Model):

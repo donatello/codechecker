@@ -8,12 +8,11 @@ import time
 import signal
 import subprocess
 
-from contests.models import Submission,Problem,Ranklist
+from codechecker.contests.models import Submission,Problem #,Ranklist
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 
-RUNS_PATH = '/share/data/submissions/'
-PROBLEM_PATH = '/share/data/problems/'
+RUNS_PATH = '/tmp/'
 OUTPUT_FILE_SIZE = int(64 << 20)    #max 64 MB
 HANG_TIME = 1
 
@@ -24,10 +23,6 @@ def log(msg):
     return
 
 
-def execute(submission):
-    pass
-
-
 def find_len(code):
     l = 0
     for i in range(len(code)) :
@@ -36,19 +31,23 @@ def find_len(code):
     
     return l
 
-def run(submission):
+def run(submission, testcase):
     
-    prob = Problem.objects.get(ID=submission['problem'])
-    sub_instance = Submission.objects.get(ID=submission['ID'])
+    prob = Problem.objects.get(id=submission.problem)
 
-    file_root = RUNS_PATH + str(submission['ID'])
+    file_root = RUNS_PATH + str(submission.pk)
     
     tlimit = prob.tlimit
     mlimit = prob.mlimit
     
+    # Create the input file.    
+    infile = str(file_root + '.in')
+    f = open(infile, "w")
+    f.write(testcase.inputFile);
+    f.close()
     
-    infile = str(PROBLEM_PATH + prob.pcode + '/infile')
-    chkfile = str(PROBLEM_PATH + prob.pcode + '/outfile')
+    #chkfile = str(PROBLEM_PATH + prob.pcode + ')
+    # Output and error files
     outfile = str(file_root + '.out')
     errorfile = str(file_root + '.err')
    
@@ -56,16 +55,15 @@ def run(submission):
     if child_id != 0 :
         
         time.sleep( prob.tlimit + 1)
-        sub_instance = Submission.objects.get(ID=submission['ID'])
         
-        if sub_instance.result == 'RUN' :
+        if submission.result == 'RUN' :
             check = os.popen('diff -B '+ outfile + ' '+ chkfile)
             if check.read() == '' :
-                sub_instance.result = 'ACC'
-                prob_inst = Problem.objects.get(ID=sub_instance.problem_id)
-                user_inst = User.objects.get(id=sub_instance.user_id)
+                submission.result = 'ACC'
+                prob_inst = Problem.objects.get(ID=submission.problem_id)
+                user_inst = User.objects.get(id=submission.user_id)
                 max_points = prob_inst.points
-                marks = max_points-find_len(str(sub_instance.code))
+                marks = max_points-find_len(str(submission.code))
                 if marks < 0 :
                     marks = 0                 
                 try :
@@ -82,20 +80,20 @@ def run(submission):
                     result = Ranklist.objects.create(
                         user = user_inst , 
                         problem = prob_inst,
-                        submission = sub_instance,
+                        submission = submission,
                         points = marks,
                     )
                
             else :
-                sub_instance.result = 'WA'
+                submission.result = 'WA'
         
-        sub_instance.save()
+        submission.save()
         return
         
     if child_id == 0 :
         
         os.setuid(7500+int( time.time() )%100007)
-
+        
         instream = open(infile,'r')
         outstream = open(outfile,'w')
         errorstream = open(errorfile,'w')
@@ -114,7 +112,9 @@ def run(submission):
         resource.setrlimit(resource.RLIMIT_FSIZE,(OUTPUT_FILE_SIZE,OUTPUT_FILE_SIZE))
         
         #set the stack,heap limits
-        resource.setrlimit(resource.RLIMIT_STACK,(mlimit,mlimit))
+        # resource.setrlimit(resource.RLIMIT_STACK,(mlimit,mlimit))
+        # --> no giving extra stack space - leave unmodified. It is 8
+        # MB default
         resource.setrlimit(resource.RLIMIT_DATA,(mlimit,mlimit))
               
         #disable forking
@@ -138,8 +138,8 @@ def run(submission):
 
             if child.returncode == None :
                 os.kill(child.pid,9)
-                sub_instance.result = 'FRK'
-                sub.save()
+                submission.result = 'FRK'
+                submission.save()
                 os._exit(0)
         
             elif child.returncode < 0  :
@@ -150,29 +150,27 @@ def run(submission):
 
                 
                 if sig == signal.SIGXCPU :
-                    sub_instance.result = 'TLE'
+                    submission.result = 'TLE'
                     
                 elif sig == signal.SIGXFSZ :
-                    sub_instance.result = 'OUTE'
+                    submission.result = 'OUTE'
                     
                 elif sig == signal.SIGSEGV :
-                    sub_instance.result = 'SEG'
+                    submission.result = 'SEG'
                 
                 elif sig == signal.SIGFPE :
-                    sub_instance.result = 'FPE'
+                    submission.result = 'FPE'
                 
                 elif sig == signal.SIGKILL :
-                    sub_instance.result = 'MLE'
+                    submission.result = 'MLE'
                 
                 elif sig == signal.SIGABRT :
-                    sub_instance.result = 'ABRT'
-                    
-                
+                    submission.result = 'ABRT'
                 
                 else :
-                    sub_instance.result = 'UNKN'
+                    submission.result = 'UNKN'
                 
-                sub_instance.save()
+                submission.save()
                 outstream.close()
                 errorstream.close()
                 os._exit(0)
@@ -187,8 +185,8 @@ def run(submission):
         except :
             log('Code Termination Failed !\n')
             log('Comments : \n' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
-            sub_instance.result = 'UNKN'
-            sub_instance.save()
+            submission.result = 'UNKN'
+            submission.save()
         
         
         os._exit(0)

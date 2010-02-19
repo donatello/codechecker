@@ -3,24 +3,24 @@ import sys
 import time
 import string
 
-from contests.models import Submission,Problem
+from codechecker.contests.models import Submission,Problem,TestCase
 import SimpleChecker
 #import MultipleChecker
 #import ComplexChecker
 
-RUNS_PATH = '/share/data/submissions/'
+RUNS_PATH = '/tmp/'
 
 def log(msg):
-    a=open('/share/checker/nohup.out','a')
+    a=open('/tmp/nohup.out','a')
     a.write(msg + '\n')
     return
 
 def handle_simple_checker(submission):
-    tests = Testcase.objects.get().filter(problem=submission.problem)
+    tests = TestCase.objects.filter(problem=submission.problem)
     
-    
-
-    SimpleChecker.run(submission)
+    for test in tests:
+        print str(test.pk)       
+        SimpleChecker.run(submission, test)
     
 
 # The 'submission' argument is a model-instance (not a dictionary).
@@ -34,18 +34,22 @@ def handle_submission( submission ):
 
     # check the compile result.
     if not(submission.check_compile_result()):
+        log(compiler_out)
+        log("Compilation failure #%s\n" % str(submission.pk))
         return
 
     # Compilation is successful. So proceeding.
        
-    compilation_out += "Compilation Successful\n"
-    log("Compilation Successful for submission #%s" % str(submission['ID']))
+    compiler_out += "Compilation Successful\n"
+    log("Compilation Successful for submission #%s" % str(submission.pk))
 
     # Run the submission's generated executable.
-    prob = Problem.objects.get(ID=submission.problem)
+    prob = Problem.objects.get(id=submission.problem.id)
+
+    handle_simple_checker(submission)
+
         
-    if prob.ptype == 'Simple':
-        handle_simple_checker(submission)
+#    if prob.ptype == 'Simple':
 #    elif prob.ptype == 'Multiple' :
 #        MultipleChecker.run(submission)
 #    elif prob.ptype == 'Complex' :

@@ -5,8 +5,11 @@ import string
 import time
 import threading
 
-from contests.models import Submission,Problem
+sys.path.append("/opt/checker")
+
+from codechecker.contests.models import Submission,Problem
 from Handler import *
+
 
 os.putenv('DJANGO_SETTINGS_MODULE','settings')
 
@@ -22,9 +25,9 @@ def main():
             log('No Submission to handle')
             continue
         submission = submissions[0]
-        log( 'Starting evaluation of  Submission #%s\n' % str(submission['ID']))
+        log( 'Starting evaluation of  Submission #%s\n' % str(submission.pk))
         handle_submission(submission)    
-        log( 'Finishing processing Submission #%s\n' % str(submission['ID']))
+        log( 'Finishing processing Submission #%s\n' % str(submission.pk))
         time.sleep(2)
     
     
