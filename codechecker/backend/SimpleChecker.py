@@ -154,15 +154,16 @@ def run(submission, testcase):
 
         try :
             helper_out = helper_child.communicate(instream.read())
-
+          
             log("Child execution completed\n")
+            log("return code for helper_child = %d" % helper_child.returncode) 
 
-            if helper_child.returncode < 0  :
+            if helper_child.returncode > 0  :
                 log('Code execution failed with exit status: ' 
                     + str(helper_child.returncode) + ' \n')
                 outstream.write(str(helper_out[0]) )
                 errorstream.write(str(helper_out[1]))
-                sig = - helper_child.returncode
+                sig = helper_child.returncode
 
 
                 if sig == signal.SIGXCPU :
@@ -186,6 +187,7 @@ def run(submission, testcase):
                 else :                    
                     submission.result = 'UNKN'
 
+                log('submission result = %s' % submission.result)
                 submission.save()
                 outstream.close()
                 errorstream.close()

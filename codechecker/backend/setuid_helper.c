@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
   int status;
   wait(&status);
   if (WIFSIGNALED(status)) {
-    return -WTERMSIG(status);
+    return status;
   }
   return 0;
 }
