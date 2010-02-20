@@ -48,17 +48,16 @@ def run(submission, testcase):
    
     try:
         child_id = os.fork()
-    except OSError:
-        log("Fork failed!\n")        
+    except OSError as err:
+        log("Fork failed! %s\n" % err.message)        
         os._exit(0)
 
     if child_id != 0 : # PARENT
 
         try:
             child_pid, child_exit_status = os.waitpid(0, 0)
-            log('waitpid syscall returned succesfully')
-        except OSError:
-            log('waitpid syscall returned -1')
+        except OSError as err:
+            log('waitpid error: %s' % err.message)
 
         # create reference output file
         chkfile = str(file_root + '.ref')
@@ -102,13 +101,14 @@ def run(submission, testcase):
 
             else :
                 submission.result = 'WA'
+                submission.save()
 
         # Cleaning up test case reference output, input, output and
         # error files.
-        os.remove(chkfile)
-        os.remove(infile)
-        os.remove(outfile)
-        os.remove(errorfile)
+        #os.remove(chkfile)
+        #os.remove(infile)
+        #os.remove(outfile)
+        #os.remove(errorfile)
 
         return
 
@@ -120,7 +120,7 @@ def run(submission, testcase):
 
         exec_file = file_root + '.exe'
 
-        log('Running inside child %s with input file as %s ' % (exec_file,infile))
+        log('Running in executable %s with input file as %s ' % (exec_file,infile))
 
         tlimit = prob.tlimit
         mlimit = prob.mlimit*1024*1024
@@ -137,12 +137,6 @@ def run(submission, testcase):
         # MB default
         resource.setrlimit(resource.RLIMIT_DATA,(mlimit,mlimit))
 
-        #disable forking
-        #the 2 process limit get used up any way !
-        #resource.setrlimit(resource.RLIMIT_NPROC,(2,2))
-
-        #file limit
-
         # Create childprocess as setuid_helper and pass the executable
         # to it.
         helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", 
@@ -155,7 +149,6 @@ def run(submission, testcase):
         try :
             helper_out = helper_child.communicate(instream.read())
           
-            log("Child execution completed\n")
             log("return code for helper_child = %d" % helper_child.returncode) 
 
             if helper_child.returncode > 0  :
@@ -179,7 +172,7 @@ def run(submission, testcase):
                     submission.result = 'FPE'
 
                 elif sig == signal.SIGKILL :
-                    submission.result = 'MLE'
+                    submission.result = 'KILL'
 
                 elif sig == signal.SIGABRT :
                     submission.result = 'ABRT'
@@ -200,10 +193,9 @@ def run(submission, testcase):
             outstream.close()
             errorstream.close()
         except :
-            log('Unknown exception!')
-            log('Code Termination Failed !\n')
-            log('Comments : \n' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
-            submission.result = 'UNKN'
+            log('Unknown exception. setuid_helper died on us! Comments : \n' + 
+                str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
+            submission.result = 'WTF'
             submission.save()
 
         os._exit(0)
