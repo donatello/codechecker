@@ -49,7 +49,12 @@ def run(submission, testcase):
     child_id = os.fork()
     if child_id != 0 : # PARENT
         
-        time.sleep( prob.tlimit + 1)
+        #time.sleep( prob.tlimit + 1)
+        try:
+            child_pid, child_exit_status = os.waitpid(0, 0)
+            log('waitpid syscall returned succesfully')
+        except OSError:
+            log('waitpid syscall returned -1')
 
         # create reference output file
         chkfile = str(file_root + '.ref')
@@ -135,7 +140,7 @@ def run(submission, testcase):
 
         # Create childprocess as setuid_helper and pass the executable
         # to it.
-        helper_child = subprocess.Popen(["/opt/checker/codechecker/setuid_helper", exec_file],
+        helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", exec_file],
                                         stdin = subprocess.PIPE,
                                         stdout = subprocess.PIPE,
                                         stderr = subprocess.PIPE)
