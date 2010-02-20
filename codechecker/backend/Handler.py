@@ -18,11 +18,24 @@ def log(msg):
 def handle_simple_checker(submission):
     tests = TestCase.objects.filter(problem=submission.problem)
     
+    # set submission status to running
+    submission.result = "RUN"
+    submission.save()
+
     for test in tests:
         print str(test.pk)       
         SimpleChecker.run(submission, test)
-    
-
+        #reload the submission data from the db
+        submission = Submission.objects.get(id = submission.id)
+        if submission.result != 'RUN':
+            break
+        
+    if submission.result == "RUN":
+        submission.result = "ACC"
+        submission.save()
+        # TODO - add points for the team, etc.
+        pass
+        
 # The 'submission' argument is a model-instance (not a dictionary).
 def handle_submission( submission ):
 
@@ -44,7 +57,7 @@ def handle_submission( submission ):
     log("Compilation Successful for submission #%s" % str(submission.pk))
 
     # Run the submission's generated executable.
-    prob = Problem.objects.get(id=submission.problem.id)
+    #prob = Problem.objects.get(id=submission.problem.id)
 
     handle_simple_checker(submission)
 

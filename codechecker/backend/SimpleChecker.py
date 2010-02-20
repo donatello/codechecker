@@ -1,3 +1,8 @@
+# This file implements SimpleChecker which is just a routine to run a
+# user submission against a given test case and report if the result
+# to the caller. It does not modify the ranklist or the db. That is
+# the work of the caller.
+
 #!/usr/bin/python
 import os
 import sys
@@ -18,22 +23,13 @@ HANG_TIME = 1
 
 
 def log(msg):
-    a=open('/share/checker/nohup.out','a')
+    a=open('/tmp/nohup.out','a')
     a.write(msg + '\n')
     return
 
-
-def find_len(code):
-    l = 0
-    for i in range(len(code)) :
-        if code[i] != ' ' and code[i] != '\n' :
-            l = l + 1
-    
-    return l
-
 def run(submission, testcase):
     
-    prob = Problem.objects.get(id=submission.problem)
+    prob = Problem.objects.get(id=submission.problem_id)
 
     file_root = RUNS_PATH + str(submission.pk)
     
@@ -43,57 +39,66 @@ def run(submission, testcase):
     # Create the input file.    
     infile = str(file_root + '.in')
     f = open(infile, "w")
-    f.write(testcase.inputFile);
+    f.write(testcase.inputFile)
     f.close()
     
-    #chkfile = str(PROBLEM_PATH + prob.pcode + ')
-    # Output and error files
+    # Output and error files    
     outfile = str(file_root + '.out')
     errorfile = str(file_root + '.err')
    
     child_id = os.fork()
-    if child_id != 0 :
+    if child_id != 0 : # PARENT
         
         time.sleep( prob.tlimit + 1)
+
+        # create reference output file
+        chkfile = str(file_root + '.ref')
+        f = open(chkfile, "w")
+        f.write(testcase.outputFile)
+        f.close()
         
+        # Reload submission from db here?!
+        submission = Submission.objects.get(id = submission.id)
+
         if submission.result == 'RUN' :
-            check = os.popen('diff -B '+ outfile + ' '+ chkfile)
-            if check.read() == '' :
-                submission.result = 'ACC'
-                prob_inst = Problem.objects.get(ID=submission.problem_id)
-                user_inst = User.objects.get(id=submission.user_id)
-                max_points = prob_inst.points
-                marks = max_points-find_len(str(submission.code))
-                if marks < 0 :
-                    marks = 0                 
-                try :
-                    result = Ranklist.objects.get( 
-                        user = user_inst,
-                        problem = prob_inst,
-                    )
+            check = subprocess.Popen('diff -B ' + outfile + ' ' + chkfile, shell=True, 
+                                     stdout=subprocess.PIPE)
+            diff_op = check.communicate()[0]
+            if diff_op == '' :
+                log("Testcase #%s matched." % testcase.id)
+                return
+
+#                 prob_inst = Problem.objects.get(id=submission.problem_id)
+#                 user_inst = User.objects.get(id=submission.user_id)
+#                 max_points = prob_inst.points
+#                 marks = max_points-find_len(str(submission.code))
+#                 if marks < 0 :
+#                     marks = 0                 
+#                 try :
+#                     result = Ranklist.objects.get( 
+#                         user = user_inst,
+#                         problem = prob_inst,
+#                     )
                     
-                    if result.points < marks :
-                        result.points = marks
-                        result.save()
+#                     if result.points < marks :
+#                         result.points = marks
+#                         result.save()
                 
-                except ObjectDoesNotExist:
-                    result = Ranklist.objects.create(
-                        user = user_inst , 
-                        problem = prob_inst,
-                        submission = submission,
-                        points = marks,
-                    )
+#                 except ObjectDoesNotExist:
+#                     result = Ranklist.objects.create(
+#                         user = user_inst , 
+#                         problem = prob_inst,
+#                         submission = submission,
+#                         points = marks,
+#                     )
                
             else :
                 submission.result = 'WA'
         
-        submission.save()
         return
         
-    if child_id == 0 :
-        
-        os.setuid(7500+int( time.time() )%100007)
-        
+    elif child_id == 0 :
+                
         instream = open(infile,'r')
         outstream = open(outfile,'w')
         errorstream = open(errorfile,'w')
@@ -103,7 +108,7 @@ def run(submission, testcase):
         log('Running inside child %s with input file as %s ' % (exec_file,infile))
 
         tlimit = prob.tlimit
-        mlimit = prob.mlimit
+        mlimit = prob.mlimit*1024*1024
         
         #set the time limit for the problem execution
         resource.setrlimit(resource.RLIMIT_CPU,(tlimit,tlimit+1))
@@ -119,34 +124,30 @@ def run(submission, testcase):
               
         #disable forking
         #the 2 process limit get used up any way !
-        resource.setrlimit(resource.RLIMIT_NPROC,(2,2))
+        #resource.setrlimit(resource.RLIMIT_NPROC,(2,2))
         
         #file limit
-        
-        
-                        
-        # new subprocess for the submission
-        child = subprocess.Popen(exec_file, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False, )
+
+        # Create childprocess as setuid_helper and pass the executable
+        # to it.
+        helper_child = subprocess.Popen("./setuid_helper %s" % (exec_file,),
+                                        shell = True,
+                                        stdin = subprocess.PIPE,
+                                        stdout = subprocess.PIPE,
+                                        stderr = subprocess.PIPE)
         
         
         try :
+            helper_out = helper_child.communicate(instream.read())
             
-            if child.stdin :
-                child.stdin.write(instream.read())
+            log("Child execution terminated\n")
         
-            out = child.communicate()
-
-            if child.returncode == None :
-                os.kill(child.pid,9)
-                submission.result = 'FRK'
-                submission.save()
-                os._exit(0)
-        
-            elif child.returncode < 0  :
-                log('Code execution failed with exit status: ' + str(child.returncode) + ' \n')
-                outstream.write('' + str(out[0]) )
-                errorstream.write('' + str(out[1]))
-                sig = - child.returncode
+            if helper_child.returncode < 0  :
+                log('Code execution failed with exit status: ' 
+                    + str(helper_child.returncode) + ' \n')
+                outstream.write(str(helper_out[0]) )
+                errorstream.write(str(helper_out[1]))
+                sig = - helper_child.returncode
 
                 
                 if sig == signal.SIGXCPU :
@@ -167,27 +168,26 @@ def run(submission, testcase):
                 elif sig == signal.SIGABRT :
                     submission.result = 'ABRT'
                 
-                else :
+                else :                    
                     submission.result = 'UNKN'
-                
+
                 submission.save()
                 outstream.close()
                 errorstream.close()
-                os._exit(0)
-            elif child.returncode == 0 :
+            elif helper_child.returncode == 0 :
                 log('Code execution successful with exit status 0')
                 
-                outstream.write('' + str(out[0]))
-                errorstream.write('' + str(out[1]))
-                outstream.close()
-                errorstream.close()
-                os._exit(0)            
+                outstream.write(str(helper_out[0]) )
+                errorstream.write(str(helper_out[1]))
+
+            outstream.close()
+            errorstream.close()
         except :
+            log('Unknown exception!')
             log('Code Termination Failed !\n')
             log('Comments : \n' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
             submission.result = 'UNKN'
             submission.save()
-        
         
         os._exit(0)
     
