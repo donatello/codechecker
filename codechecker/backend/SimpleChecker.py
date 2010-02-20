@@ -66,7 +66,6 @@ def run(submission, testcase):
             diff_op = check.communicate()[0]
             if diff_op == '' :
                 log("Testcase #%s matched." % testcase.id)
-                return
 
 #                 prob_inst = Problem.objects.get(id=submission.problem_id)
 #                 user_inst = User.objects.get(id=submission.user_id)
@@ -94,7 +93,13 @@ def run(submission, testcase):
                
             else :
                 submission.result = 'WA'
-        
+
+#       Cleaning up test case reference output, input, output and error files. 
+        os.remove(chkfile)
+        os.remove(infile)
+        os.remove(outfile)
+        os.remove(errorfile)
+
         return
         
     elif child_id == 0 :
@@ -130,8 +135,7 @@ def run(submission, testcase):
 
         # Create childprocess as setuid_helper and pass the executable
         # to it.
-        helper_child = subprocess.Popen("./setuid_helper %s" % (exec_file,),
-                                        shell = True,
+        helper_child = subprocess.Popen(["/opt/checker/codechecker/setuid_helper", exec_file],
                                         stdin = subprocess.PIPE,
                                         stdout = subprocess.PIPE,
                                         stderr = subprocess.PIPE)
