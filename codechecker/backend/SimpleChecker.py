@@ -131,31 +131,31 @@ def run(submission, testcase):
         #set the output file date size
         resource.setrlimit(resource.RLIMIT_FSIZE,(OUTPUT_FILE_SIZE,OUTPUT_FILE_SIZE))
 
-        #set the stack,heap limits
-        # resource.setrlimit(resource.RLIMIT_STACK,(mlimit,mlimit))
+        #set the heap limits
         # --> no giving extra stack space - leave unmodified. It is 8
         # MB default
         resource.setrlimit(resource.RLIMIT_DATA,(mlimit,mlimit))
 
         # Create childprocess as setuid_helper and pass the executable
-        # to it.
+        # to it along with the file descriptors for the streams. This
+        # will let the OS handle buffering of I/O.
         helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", 
                                          exec_file],
-                                        stdin = subprocess.PIPE,
-                                        stdout = subprocess.PIPE,
-                                        stderr = subprocess.PIPE)
+                                        stdin = instream,
+                                        stdout = outstream,
+                                        stderr = errorstream)
 
 
         try :
-            helper_out = helper_child.communicate(instream.read())
+
+            #This will wait for process to terminate
+            helper_child.communicate()
           
             log("return code for helper_child = %d" % helper_child.returncode) 
 
-            if helper_child.returncode > 0  :
+            if helper_child.returncode > 0:
                 log('Code execution failed with exit status: ' 
                     + str(helper_child.returncode) + ' \n')
-                outstream.write(str(helper_out[0]) )
-                errorstream.write(str(helper_out[1]))
                 sig = helper_child.returncode
 
 
@@ -182,16 +182,9 @@ def run(submission, testcase):
 
                 log('submission result = %s' % submission.result)
                 submission.save()
-                outstream.close()
-                errorstream.close()
             elif helper_child.returncode == 0 :
                 log('Code execution successful with exit status 0')
 
-                outstream.write(str(helper_out[0]) )
-                errorstream.write(str(helper_out[1]))
-
-            outstream.close()
-            errorstream.close()
         except :
             log('Unknown exception. setuid_helper died on us! Comments : \n' + 
                 str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
