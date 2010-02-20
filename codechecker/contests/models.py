@@ -91,6 +91,8 @@ class Submission(models.Model):
             return "c"
         elif self.get_submissionLang_display() == 'JAVA':
             return "java"
+        else:
+            return "c"
 
     def write_code_to_disk(self):
         f = open(RUNS_PATH + str(self.pk) + '.' + self._get_filename_extension(),'w')

@@ -46,10 +46,14 @@ def run(submission, testcase):
     outfile = str(file_root + '.out')
     errorfile = str(file_root + '.err')
    
-    child_id = os.fork()
+    try:
+        child_id = os.fork()
+    except OSError:
+        log("Fork failed!\n")        
+        os._exit(0)
+
     if child_id != 0 : # PARENT
-        
-        #time.sleep( prob.tlimit + 1)
+
         try:
             child_pid, child_exit_status = os.waitpid(0, 0)
             log('waitpid syscall returned succesfully')
@@ -61,7 +65,7 @@ def run(submission, testcase):
         f = open(chkfile, "w")
         f.write(testcase.outputFile)
         f.close()
-        
+
         # Reload submission from db here?!
         submission = Submission.objects.get(id = submission.id)
 
@@ -83,11 +87,11 @@ def run(submission, testcase):
 #                         user = user_inst,
 #                         problem = prob_inst,
 #                     )
-                    
+
 #                     if result.points < marks :
 #                         result.points = marks
 #                         result.save()
-                
+
 #                 except ObjectDoesNotExist:
 #                     result = Ranklist.objects.create(
 #                         user = user_inst , 
@@ -95,20 +99,21 @@ def run(submission, testcase):
 #                         submission = submission,
 #                         points = marks,
 #                     )
-               
+
             else :
                 submission.result = 'WA'
 
-#       Cleaning up test case reference output, input, output and error files. 
+        # Cleaning up test case reference output, input, output and
+        # error files.
         os.remove(chkfile)
         os.remove(infile)
         os.remove(outfile)
         os.remove(errorfile)
 
         return
-        
+
     elif child_id == 0 :
-                
+
         instream = open(infile,'r')
         outstream = open(outfile,'w')
         errorstream = open(errorfile,'w')
@@ -119,38 +124,39 @@ def run(submission, testcase):
 
         tlimit = prob.tlimit
         mlimit = prob.mlimit*1024*1024
-        
+
         #set the time limit for the problem execution
         resource.setrlimit(resource.RLIMIT_CPU,(tlimit,tlimit+1))
-            
+
         #set the output file date size
         resource.setrlimit(resource.RLIMIT_FSIZE,(OUTPUT_FILE_SIZE,OUTPUT_FILE_SIZE))
-        
+
         #set the stack,heap limits
         # resource.setrlimit(resource.RLIMIT_STACK,(mlimit,mlimit))
         # --> no giving extra stack space - leave unmodified. It is 8
         # MB default
         resource.setrlimit(resource.RLIMIT_DATA,(mlimit,mlimit))
-              
+
         #disable forking
         #the 2 process limit get used up any way !
         #resource.setrlimit(resource.RLIMIT_NPROC,(2,2))
-        
+
         #file limit
 
         # Create childprocess as setuid_helper and pass the executable
         # to it.
-        helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", exec_file],
+        helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", 
+                                         exec_file],
                                         stdin = subprocess.PIPE,
                                         stdout = subprocess.PIPE,
                                         stderr = subprocess.PIPE)
-        
-        
+
+
         try :
             helper_out = helper_child.communicate(instream.read())
-            
-            log("Child execution terminated\n")
-        
+
+            log("Child execution completed\n")
+
             if helper_child.returncode < 0  :
                 log('Code execution failed with exit status: ' 
                     + str(helper_child.returncode) + ' \n')
@@ -158,25 +164,25 @@ def run(submission, testcase):
                 errorstream.write(str(helper_out[1]))
                 sig = - helper_child.returncode
 
-                
+
                 if sig == signal.SIGXCPU :
                     submission.result = 'TLE'
-                    
+
                 elif sig == signal.SIGXFSZ :
                     submission.result = 'OUTE'
-                    
+
                 elif sig == signal.SIGSEGV :
                     submission.result = 'SEG'
-                
+
                 elif sig == signal.SIGFPE :
                     submission.result = 'FPE'
-                
+
                 elif sig == signal.SIGKILL :
                     submission.result = 'MLE'
-                
+
                 elif sig == signal.SIGABRT :
                     submission.result = 'ABRT'
-                
+
                 else :                    
                     submission.result = 'UNKN'
 
@@ -185,7 +191,7 @@ def run(submission, testcase):
                 errorstream.close()
             elif helper_child.returncode == 0 :
                 log('Code execution successful with exit status 0')
-                
+
                 outstream.write(str(helper_out[0]) )
                 errorstream.write(str(helper_out[1]))
 
@@ -197,6 +203,6 @@ def run(submission, testcase):
             log('Comments : \n' + str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
             submission.result = 'UNKN'
             submission.save()
-        
+
         os._exit(0)
-    
+
