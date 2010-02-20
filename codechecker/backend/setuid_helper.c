@@ -1,3 +1,13 @@
+/* Setuid Helper - ARCH notes
+The Code Checker process runs as a non-root user (checker). To run the submission 
+programs as a different user than 'checker', we use setuid_helper.c to achieve it.
+setuid_helper is a setuid root executable which limits NPROC and NOFILE for itself, so that 
+all its child process can inherit the same and changes the user id of the submission. 
+
+Soon it will also run the submission program in a chroot jail preventing it from browsing 
+the filesystem.
+*/
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
