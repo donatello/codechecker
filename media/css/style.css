@@ -73,6 +73,13 @@ h3{
     color: #275A78;
 }
 
+h4{
+    font-size: 14px;
+    font-weight: bold;
+    padding: 3px;
+    color: #275A78;
+}
+
 .content {
     padding: 10px;
     text-align: justify;

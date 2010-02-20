@@ -18,6 +18,9 @@ def format_time(t):
 def contests_default(request): 
     return HttpResponsePermanentRedirect('/site/contests/all/')
 
+def problems_default(request):
+    return HttpResponsePermanentRedirect("/site/problems/all/");
+
 def show_all_contests(request, page=1):
     vars = {}
     vars['category'] = 'Contests'
@@ -44,25 +47,6 @@ def show_all_contests(request, page=1):
     template = loader.get_template('table.html')    
     context = Context(request, vars)
     return HttpResponse(template.render(context))
-
-def show_contest(request, contest_id, action='description'):
-    vars = {}
-    contest = Contest.objects.get(pk=contest_id)
-    vars['contest'] = contest.pk
-    vars['section'] = action 
-    vars['description'] = contest.description
-    vars['title'] = contest.title
-
-    if action == 'problems' :
-        problem_vars =  show_all_problems(request, contest)
-        vars.update(problem_vars) 
-    
-    context = Context(request, vars)
-    template = loader.get_template('contest.html')
-    return HttpResponse(template.render(context))
-
-def show_problem(request, problem_id):
-    return HttpResponse("Show Problem")
 
 def show_all_problems(request, contest = -1):
     vars = { }
@@ -95,5 +79,36 @@ def show_all_problems(request, contest = -1):
     template = loader.get_template('table.html')
     return HttpResponse(template.render(context))
 
-def problems_default(request):
-    return HttpResponsePermanentRedirect("/site/problems/all/");
+def show_contest(request, contest_id, action='description'):
+    vars = {}
+    contest = Contest.objects.get(pk=contest_id)
+    vars['contest'] = contest.pk
+    vars['section'] = action 
+    vars['description'] = contest.description
+    vars['title'] = contest.title
+
+    if action == 'problems' :
+        problem_vars =  show_all_problems(request, contest)
+        vars.update(problem_vars) 
+    
+    context = Context(request, vars)
+    template = loader.get_template('contest.html')
+    return HttpResponse(template.render(context))
+
+def show_problem(request, problem_id, action='view'):
+    vars = { }
+    problem = Problem.objects.get(pk=problem_id)
+    vars['problem'] = problem.pk
+    vars['problem_code'] = problem.problemCode
+    vars['section'] = action
+    vars['problem_statement'] = problem.problemStatement
+    vars['problem_notes'] = problem.problemNotes
+    vars['input_data'] = problem.inputData
+    vars['output_data'] = problem.outputData
+    vars['tlimit'] = problem.tlimit
+    vars['mlimit'] = problem.mlimit
+
+    context = Context(request, vars)
+    template = loader.get_template('problem.html')
+    return HttpResponse(template.render(context))
+
