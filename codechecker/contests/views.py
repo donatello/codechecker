@@ -107,6 +107,8 @@ def show_problem(request, problem_id, action='view'):
     vars['output_data'] = problem.outputData
     vars['tlimit'] = problem.tlimit
     vars['mlimit'] = problem.mlimit
+    
+
 
     context = Context(request, vars)
     template = loader.get_template('problem.html')

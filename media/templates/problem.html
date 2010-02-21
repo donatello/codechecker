@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block header %}
+<h3> Problem : {{ problem_code }} </h3>
+{% endblock %}
+
+{% block links %}
+<div id="links">
+    <a href = "/site/problems/{{ problem }}/" id="view">View Problem</a>
+    <a href = "/site/problems/{{ problem }}/submit/" id="submit">Submit</a>
+    <a href = "/site/problems/{{ problem }}/all_submissions/" id="all_submissions">All Submissions</a>
+    <a href = "/site/problems/{{ problem }}/my_submissions/" id="my_submissions">My Submissions</a>
+</div>
+    <script type="text/javascript">
+    var linkNode = document.getElementById("{{ section }}");
+    linkNode.className = "selected";
+    </script>
+{% endblock %}
+
+{% block main_content %}
+{{ problem_statement }}
+<div class ="constraints"> {{ problem_notes }}</div>
+<div class ="data">
+    <h4> Sample Input : </h4>
+    <pre> {{ input_data }} </pre>
+    <h4> Sample Output : </h4>
+    <pre> {{ output_data }} </pre>
+    <h4> Time Limit : {{ tlimit }} sec, Memory Limit : {{ mlimit }} MB</h4> 
+</div>
+{% endblock %}
+

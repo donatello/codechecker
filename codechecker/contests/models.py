@@ -1,7 +1,7 @@
 from django.contrib import admin
-
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ModelForm
 import datetime
 
 
@@ -52,6 +52,7 @@ class Problem(models.Model):
     def __unicode__(self):
         return self.problemCode
         
+
 class Submission(models.Model):
     user = models.ForeignKey(User)
     problem = models.ForeignKey(Problem)
@@ -116,6 +117,13 @@ class Submission(models.Model):
             return False
         return True
 
+class SubmissionForm(ModelForm):
+    class Meta:
+        model = Submission
+        fields = [ 'submissionLang', 'submissionCode' ]
+        widgets = {
+                    'submissionCode' : Textarea(attrs={'cols' : 100, 'rows' : 25}),
+                }
 
 class TestCase(models.Model):
     problem = models.ForeignKey(Problem)
