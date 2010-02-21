@@ -79,7 +79,7 @@ def show_all_problems(request, contest = -1):
     template = loader.get_template('table.html')
     return HttpResponse(template.render(context))
 
-def show_contest(request, contest_id, action='description'):
+def contest_view_handle(request, contest_id, action='description'):
     vars = {}
     contest = Contest.objects.get(pk=contest_id)
     vars['contest'] = contest.pk
@@ -95,7 +95,7 @@ def show_contest(request, contest_id, action='description'):
     template = loader.get_template('contest.html')
     return HttpResponse(template.render(context))
 
-def show_problem(request, problem_id, action='view'):
+def problem_view_handle(request, problem_id, action='view'):
     vars = { }
     problem = Problem.objects.get(pk=problem_id)
     vars['problem'] = problem.pk
@@ -107,10 +107,16 @@ def show_problem(request, problem_id, action='view'):
     vars['output_data'] = problem.outputData
     vars['tlimit'] = problem.tlimit
     vars['mlimit'] = problem.mlimit
-    
 
+    if action == 'submit':
+        problem_submit(request, vars)
 
     context = Context(request, vars)
     template = loader.get_template('problem.html')
     return HttpResponse(template.render(context))
 
+def problem_submit(request, vars) :
+    vars['form'] = SubmissionForm()
+    context = Context(request, vars)
+    template = loader.get_template('problem.html')
+    return HttpResponse(template.render(context))
