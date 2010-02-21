@@ -1,7 +1,6 @@
 # This file implements SimpleChecker which is just a routine to run a
 # user submission against a given test case and report if the result
-# to the caller. It does not modify the ranklist or the db. That is
-# the work of the caller.
+# to the caller. 
 
 #!/usr/bin/python
 import os
