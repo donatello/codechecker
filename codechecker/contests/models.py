@@ -16,6 +16,16 @@ RESULT_TYPES = (
     ('CMP', 'COMPILING'),
     ('CMPE', 'COMPILATION FAILURE'),
     ('RUN', 'RUNNING'),
+    ('ACC', 'ACCEPTED'),
+    ('WA', 'WRONG ANSWER'),
+    ('TLE', 'TIME LIMIT EXCEEDED'),
+    ('OUTE', 'OUTPUT LIMIT EXCEEDED'),
+    ('SEG', 'SEGMENTATION FAULT'),
+    ('FPE', 'FLOATING POINT ERROR'),
+    ('KILL', 'KILLED'),    
+    ('ABRT', 'ABORT SIGNALLED'),    
+    ('UNKN', ''),
+    ('WTF', ''),
 )
 
 RUNS_PATH = '/tmp/'
