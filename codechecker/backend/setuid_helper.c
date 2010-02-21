@@ -30,17 +30,19 @@ int main(int argc, char* argv[]) {
     
     //set limit on the number of files that can be opened.
     fork_lim.rlim_cur = fork_lim.rlim_max = 3;
-    ret = setrlimit(RLIMIT_NOFILE, &fork_lim);
+    //ret = setrlimit(RLIMIT_NOFILE, &fork_lim);
 
     //		printf("ret = %d\n", ret);
-    ret = execvp(argv[1], NULL);    
-    //		printf("execvp ret = %d\n", ret);
-
+    ret = execvp(argv[2], NULL);    
+    //arbitrarily chosen to let parent know that execvp failed; we reach here only if execvp fails 
+    return 111;
   }
   int status;
+  FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
   wait(&status);
   if (WIFSIGNALED(status)) {
-    return status;
+   	if(argv[1][0] == '1') fprintf(fp, "submission %s signalled status = %d\n", argv[2], status);
   }
-  return 0;
+  fclose(fp);
+  return status;
 }

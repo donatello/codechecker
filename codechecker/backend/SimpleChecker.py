@@ -16,16 +16,12 @@ import subprocess
 from codechecker.contests.models import Submission,Problem #,Ranklist
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from codechecker.Logger import *
 
 RUNS_PATH = '/tmp/'
 OUTPUT_FILE_SIZE = int(64 << 20)    #max 64 MB
 HANG_TIME = 1
 
-
-def log(msg):
-    a=open('/tmp/nohup.out','a')
-    a.write(msg + '\n')
-    return
 
 def run(submission, testcase):
     
@@ -144,7 +140,7 @@ def run(submission, testcase):
         # to it along with the file descriptors for the streams. This
         # will let the OS handle buffering of I/O.
         helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", 
-                                         exec_file],
+                                         str(get_log_level()), exec_file],
                                         stdin = instream,
                                         stdout = outstream,
                                         stderr = errorstream)

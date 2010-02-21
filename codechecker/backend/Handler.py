@@ -5,15 +5,11 @@ import string
 
 from codechecker.contests.models import Submission,Problem,TestCase
 import SimpleChecker
+from codechecker.Logger import log
 #import MultipleChecker
 #import ComplexChecker
 
 RUNS_PATH = '/tmp/'
-
-def log(msg):
-    a=open('/tmp/nohup.out','a')
-    a.write(msg + '\n')
-    return
 
 def handle_simple_checker(submission):
     tests = TestCase.objects.filter(problem=submission.problem)
