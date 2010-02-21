@@ -19,13 +19,15 @@
 {% block main_content %}
 {% ifequal section "view" %}"
 {{ problem_statement }}
+<br>
 <div class ="constraints"> {{ problem_notes }}</div>
 <div class ="data">
-    <h4> Sample Input : </h4>
+    <h4> Sample Input: </h4>
     <pre> {{ input_data }} </pre>
-    <h4> Sample Output : </h4>
+    <h4> Sample Output: </h4>
     <pre> {{ output_data }} </pre>
-    <h4> Time Limit : {{ tlimit }} sec, Memory Limit : {{ mlimit }} MB</h4> 
+    <h4> Time Limit: {{ tlimit }} sec <br>
+      Memory Limit: {{ mlimit }} MB</h4> 
 </div>
 {% endifequal %}
 {% ifequal section "submit" %}
