@@ -17,7 +17,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from codechecker.Logger import *
 
-RUNS_PATH = '/tmp/'
+RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
 OUTPUT_FILE_SIZE = int(64 << 20)    #max 64 MB
 HANG_TIME = 1
 
@@ -151,6 +151,12 @@ def run(submission, testcase):
             helper_child.communicate()
           
             log("return code for helper_child = %d" % helper_child.returncode) 
+
+            #check for the magic condition that tells that execvp
+            #failed in the setuid program
+            if helper_child.returncode == 111:
+                log('EXECVE failed in the child!!!!')
+                os._exit(0)
 
             if helper_child.returncode > 0:
                 log('Code execution failed with exit status: ' 
