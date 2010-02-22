@@ -169,6 +169,17 @@ h4{
 .zebra .odd{
     background: #F4DDB1 none repeat scroll 0 0;
 }
+.zebra .green {
+    background: #00C030 none repeat scroll 0 0;
+}
+
+.zebra .orange {
+    background: #F09A24 none repeat scroll 0 0;
+}
+
+.zebra .grey {
+    background: #DDDDDD none repeat scroll 0 0;
+}
 
 .zebra a{
     text-decoration: none;

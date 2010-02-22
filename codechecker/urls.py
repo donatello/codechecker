@@ -1,5 +1,5 @@
+import django
 from django.conf.urls.defaults import *
-from django.contrib.auth import views as auth_views
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -21,10 +21,16 @@ urlpatterns = patterns('',
     (r'^references/', 'codechecker.generic_views.default', { 'action' : 'references'}),
     
     # User Related Views
-    (r'login/$', auth_views.login, { 'template_name' : 'accounts/login.html', }),
-    (r'logout/$',auth_views.logout, { 'next_page' : '/site/', }), 
+    (r'login/$', 'django.contrib.auth.views.login', { 'template_name' : 'accounts/login.html', }),
+    (r'logout/$', 'django.contrib.auth.views.logout', { 'next_page' : '/site/', }), 
 
     #Contest Related Views
     (r'^contests/', include('codechecker.contests.contest_urls')),
+
+    # Problem Related Views
     (r'^problems/', include('codechecker.contests.problem_urls')),
+
+    # Submission related Views
+    (r'^submissions/', include('codechecker.contests.submission_urls')),
+    (r'^my_submissions/', include('codechecker.contests.submission_urls', { 'user_context' : 1 })),
 )

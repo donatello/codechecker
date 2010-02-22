@@ -6,12 +6,9 @@ import time
 import threading
 
 sys.path.append("/opt/checker")
-
 from codechecker.contests.models import Submission,Problem
+#from utils.Logger import Logger as log
 from Handler import *
-
-
-os.putenv('DJANGO_SETTINGS_MODULE','settings')
 
 
 def main():

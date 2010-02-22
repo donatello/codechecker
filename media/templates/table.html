@@ -14,8 +14,12 @@
         {% endfor %}
     </tr></thead>
     {% for rowItem in rows %}
+    {% if colored %}
+    <tr class="{{ rowItem.color }}">
+    {% else %}
     <tr class="{% cycle "odd" "even" %}">
-        {% for col in rowItem %}
+    {% endif %}
+        {% for col in rowItem.items %}
         <td> 
             {% if col.link %} 
             <a href="{{ col.link }}">{{ col.value }}</a>

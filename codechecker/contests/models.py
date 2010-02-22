@@ -7,9 +7,9 @@ import datetime
 
 
 LANG_TYPES = (
-    (1,'C'),
-    (2,'C++'),
-    (3,'JAVA'),
+    ('c','C'),
+    ('cpp','C++'),
+    #(3,'JAVA'),
 )
 
 RESULT_TYPES = (
@@ -68,15 +68,15 @@ class Problem(models.Model):
 class Submission(models.Model):
     user = models.ForeignKey(User)
     problem = models.ForeignKey(Problem)
-    result = models.CharField(max_length=4, choices=RESULT_TYPES)
+    result = models.CharField(max_length=4, choices=RESULT_TYPES, default="QU")
     submissionTime = models.DateTimeField(default=datetime.datetime.now())
-    submissionLang = models.SmallIntegerField(choices=LANG_TYPES)
-    submissionPenalty = models.IntegerField()
-    submissionPoints = models.IntegerField()
+    submissionLang = models.CharField(max_length=10, choices=LANG_TYPES)
+    submissionPenalty = models.IntegerField(default=-1)
+    submissionPoints = models.IntegerField(default=0)
     submissionCode = models.TextField()    
     
     def __unicode__(self):
-        return self.pk    
+        return repr(self.pk)   
 
     # The prefix underscore implies that the function is not an
     # exported interface (i think).
@@ -130,11 +130,9 @@ class Submission(models.Model):
             return False
         return True
 
-class SubmissionForm(forms.ModelForm):
-    class Meta:
-        model = Submission
-        fields = [ 'submissionLang', 'submissionCode' ]
-        widgets = { 'submissionCode' : forms.Textarea(attrs={'cols' : 100, 'rows' : 25,}), }
+class SubmissionForm(forms.Form):
+    SubmissionLang = forms.CharField(widget=forms.Select(choices=LANG_TYPES))
+    SubmissionCode = forms.CharField(widget=forms.Textarea(attrs={'rows':'30', 'cols':'80'}))
 
 class TestCase(models.Model):
     problem = models.ForeignKey(Problem)
