@@ -20,16 +20,18 @@ by the user the submission is going to run as.
 #include <stdio.h>
 #include <signal.h>
 
+pid_t p;
+
 static void alarm_handler(int signo) 
 {
   /* its time to kill the child now! */
-  kill(0, SIGKILL);
+  kill(p, SIGKILL);
 }
 
 struct sigaction alarm_act;
 int main(int argc, char* argv[]) {
   // fork argv[1]
-  pid_t p = fork();
+  p = fork();
   if (!p) { 
     //drop priveleges
     setuid(1002);    
