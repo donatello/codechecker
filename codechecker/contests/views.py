@@ -180,9 +180,6 @@ def contest_view_handle(request, contest_id, action='description'):
     elif action == 'ranklist':
         ranklist_vars =  show_ranklist(request, contest)
         vars.update(ranklist_vars)
-        context = Context(request, vars)
-        template = loader.get_template('contest.html')
-        return HttpResponse(template.render(context))
 
     context = Context(request, vars)
     template = loader.get_template('contest.html')
