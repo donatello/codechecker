@@ -9,7 +9,8 @@ from codechecker.Logger import log
 #import MultipleChecker
 #import ComplexChecker
 
-RUNS_PATH = '/tmp/'
+RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
+JAIL = '/opt/checker/codechecker/backend/submissions/jail/'
 
 def handle_simple_checker(submission):
     tests = TestCase.objects.filter(problem=submission.problem)

@@ -3,13 +3,12 @@
 # to the caller. 
 
 #!/usr/bin/python
-import os
+import os, stat
 import sys
 import resource
 import string
 import datetime
 import time
-import signal
 import subprocess
 
 from codechecker.contests.models import Submission,Problem #,Ranklist
@@ -18,6 +17,7 @@ from django.contrib.auth.models import User
 from codechecker.Logger import *
 
 RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
+JAIL = '/opt/checker/codechecker/backend/submissions/jail/'
 OUTPUT_FILE_SIZE = int(64 << 20)    #max 64 MB
 HANG_TIME = 1
 
@@ -27,6 +27,7 @@ def run(submission, testcase):
     prob = Problem.objects.get(id=submission.problem_id)
 
     file_root = RUNS_PATH + str(submission.pk)
+    exec_file = JAIL + str(submission.pk)
     
     tlimit = prob.tlimit
     mlimit = prob.mlimit
@@ -113,11 +114,11 @@ def run(submission, testcase):
 
     elif child_id == 0 :
 
-        instream = open(infile,'r')
+        instream = open(infile,'r')        
         outstream = open(outfile,'w')
+        os.chmod(outfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_ROTH)
         errorstream = open(errorfile,'w')
-
-        exec_file = file_root + '.exe'
+        os.chmod(errorfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_ROTH)
 
         log('Running in executable %s with input file as %s ' % (exec_file,infile))
 

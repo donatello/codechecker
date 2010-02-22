@@ -29,7 +29,8 @@ RESULT_TYPES = (
     ('WTF', ''),
 )
 
-RUNS_PATH = '/tmp/'
+RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
+JAIL = '/opt/checker/codechecker/backend/submissions/jail/'
 
 class Contest(models.Model):
     title = models.CharField(max_length = 25)
@@ -81,7 +82,7 @@ class Submission(models.Model):
     # exported interface (i think).
     def _generate_compile_command(self):
         s = str('')
-        file_root = RUNS_PATH + str(self.pk) 
+        file_root = JAIL + str(self.pk) 
 
         if self.get_submissionLang_display() == 'C++':
             s = ('g++  -Wall -o ' + str(file_root)  + '.exe ' + 
@@ -107,7 +108,7 @@ class Submission(models.Model):
             return "c"
 
     def write_code_to_disk(self):
-        f = open(RUNS_PATH + str(self.pk) + '.' + self._get_filename_extension(),'w')
+        f = open(JAIL + str(self.pk) + '.' + self._get_filename_extension(),'w')
         f.write(self.submissionCode)
         f.close()
 
@@ -117,8 +118,9 @@ class Submission(models.Model):
         self.result = 'CMP'
         self.save()
         compile = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
-        compile_out = compile.communicate()[1]
-        return compile_out
+        compile_out = compile.communicate()
+        print "COMPILER STDERR: ", compile_out[1]
+        return compile_out[1]
         
     def check_compile_result(self):
         import os
