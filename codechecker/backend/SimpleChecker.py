@@ -3,7 +3,7 @@
 # to the caller. 
 
 #!/usr/bin/python
-import os, stat
+import os, stat, signal
 import sys
 import resource
 import string
