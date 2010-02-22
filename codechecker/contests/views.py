@@ -80,6 +80,91 @@ def show_all_problems(request, contest = -1):
     template = loader.get_template('table.html')
     return HttpResponse(template.render(context))
 
+def ranklist_cmp(userA, userB):
+    if userA[1] != userB[1]:
+        return userA[1] - userB[1]
+    return userB[2] - userA[2]
+    
+def show_ranklist(request, contest):
+    vars = { }
+    vars['category'] = 'Ranklist'
+
+    problems =  Problem.objects.filter(contest=contest).values( 'pk', 'problemCode', 'maxScore' )
+    vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
+
+    for problem in problems:
+        vars['columns'].append( { 'name' : problem['problemCode'], 
+                                  'link' : '/site/problems/' + str(problem['pk']) +'/' })
+
+    # first get all submissions that correspond to this contest and
+    # are submitted during the duration of this contest
+    subs = Submission.objects.filter(submissionTime__gte=contest.startDateTime
+                                     ).filter(submissionTime__lte=contest.endDateTime
+                                              ).filter(problem__contest__exact = contest.id)
+
+    # form (user -> solved problems), (user -> total scores) and (user ->
+    # penalty) mappings.
+    user_solvedprobs = {}    
+    user_scores = {}
+    user_penalty = {}
+    for sub in subs:
+        try:
+            user_scores[sub.user_id] += sub.submissionPoints
+        except KeyError:
+            user_scores[sub.user_id] = sub.submissionPoints
+        if sub.result == 'ACC':
+            if sub.user_id in user_solvedprobs:
+                user_solvedprobs[sub.user_id].add(sub.problem_id)
+            else:
+                user_solvedprobs[sub.user_id] = Set([sub.problem_id])
+
+            tdelta = sub.submissionTime - contest.startDateTime
+            minutes = tdelta.days*24*60 + tdelta.seconds/60
+            if sub.user_id in user_penalty:
+                user_penalty[sub.user_id] += minutes
+            else:
+                user_penalty[sub.user_id] = minutes
+    
+    
+    for sub in subs:
+        if sub.user_id in user_solvedprobs and sub.problem_id in user_solvedprobs[sub.user_id]:
+            if sub.user_id in user_penalty:
+                user_penalty[sub.user_id] += sub.submissionPenalty
+            else:
+                user_penalty[sub.user_id] = sub.submissionPenalty
+
+    # now sort the users according to the ranking ordering -> sort by
+    # scores descending, and break ties by penalties ascending.
+    distinct_users = subs.values_list('user_id').distinct()
+    user_tuples = []
+    for user in distinct_users:
+        score, penalty = 0,0
+        if user in user_scores: score = user_scores[user]
+        if user in user_penalty: penalty = user_penalty[user]
+        user_tuples.append([user, score, penalty])
+        
+    sorted_users = sorted(user_tuples, ranklist_cmp)
+
+
+    # now form the remaining rows of the ranklist
+    rows = []
+    for user in sorted_users:
+        rowItem = []
+        rowItem.append( { 'value': Users.objects.get(id = user[0]).username})
+        rowItem.append( { 'value': user_scores[user[0]] })
+        rowItem.append( { 'value': user_penalty[user[0]] })
+        for problem in problems:
+            attempts = subs.filter(problem_id = problem['pk']).filter(user_id = user[0])
+            if problem['pk'] in user_solvedprobs[user[0]]:
+                rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
+            else:
+                rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
+        rows.append(rowItem)
+
+    vars['rows'] = rows
+
+    return vars    
+
 def contest_view_handle(request, contest_id, action='description'):
     vars = {}
     contest = Contest.objects.get(pk=contest_id)
@@ -90,7 +175,14 @@ def contest_view_handle(request, contest_id, action='description'):
 
     if action == 'problems' :
         problem_vars =  show_all_problems(request, contest)
-        vars.update(problem_vars) 
+        vars.update(problem_vars)
+
+    elif action == 'ranklist':
+        ranklist_vars =  show_ranklist(request, contest)
+        vars.update(ranklist_vars)
+        context = Context(request, vars)
+        template = loader.get_template('contest.html')
+        return HttpResponse(template.render(context))
 
     context = Context(request, vars)
     template = loader.get_template('contest.html')

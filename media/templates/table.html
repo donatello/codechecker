@@ -9,7 +9,13 @@
 <table id="{{category}}" class="zebra"> 
     <thead><tr>
         {% for col in columns %}
-        <th scope="col"> {{ col.name }} </th>    
+        <th scope="col"> 
+	  {% if col.link %} 
+          <a href="{{ col.link }}">{{ col.name }}</a>
+          {% else %}
+          {{ col.name }}
+          {% endif %}
+	</th>    
         {% empty %}
         {% endfor %}
     </tr></thead>
