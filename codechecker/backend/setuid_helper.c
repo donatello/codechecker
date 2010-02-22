@@ -30,7 +30,7 @@ static void alarm_handler(int signo)
 
 struct sigaction alarm_act;
 int main(int argc, char* argv[]) {
-  // fork 
+  // fork argv[1]
   p = fork();
   if (!p) { 
     //drop priveleges
@@ -39,13 +39,12 @@ int main(int argc, char* argv[]) {
     // set limit on number of forks possible.
     lim.rlim_cur = lim.rlim_max = 0; 
     int ret = setrlimit(RLIMIT_NPROC, &lim);
-
-    //set limit on address space and data segment 
-    lim.rlim_cur = lim.rlim_max = 64<<20;
-    ret = setrlimit(RLIMIT_AS, &lim);
-    ret = setrlimit(RLIMIT_DATA, &lim);
+    //set limit on the number of files that can be opened.
+    //lim.rlim_cur = lim.rlim_max = 3;
+    //ret = setrlimit(RLIMIT_NOFILE, &lim);
 
     ret = execvp(argv[2], NULL);    
+    printf("ret = %d and errno = %d\n", ret, errno);
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
     return 111;
