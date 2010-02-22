@@ -84,15 +84,18 @@ class Submission(models.Model):
         file_root = RUNS_PATH + str(self.pk) 
 
         if self.get_submissionLang_display() == 'C++':
-            s = ('g++  -Wall -o ' + str(file_root)  + '.exe ' + 
+            s = ('g++ -O2 -Wall -o ' + str(file_root)  + '.exe ' + 
                  str(str(file_root) + '.' + self._get_filename_extension()))
 
         elif self.get_submissionLang_display() == 'C':
-            s = ('gcc  -Wall -o ' + str(file_root)  + '.exe ' + 
+            s = ('gcc -O2 -Wall -o ' + str(file_root)  + '.exe ' + 
                  str(str(file_root) + '.' + self._get_filename_extension()))
 
         elif self.get_submissionLang_display() == 'JAVA':
             s = 'do nothing for now '
+
+        else:
+            s = 'oh no'            
 
         return s
 
@@ -116,9 +119,10 @@ class Submission(models.Model):
         cmd = self._generate_compile_command()
         self.result = 'CMP'
         self.save()
-        compile = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
+        compile = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         compile_out = compile.communicate()
-        #print "COMPILER STDERR: ", compile_out[1]
+        print "COMPILER STDOUT: ", compile_out[0]
+        print "COMPILER STDERR: ", compile_out[1]
         return compile_out[1]
         
     def check_compile_result(self):
