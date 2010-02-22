@@ -119,12 +119,12 @@ class Submission(models.Model):
         self.save()
         compile = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
         compile_out = compile.communicate()
-        print "COMPILER STDERR: ", compile_out[1]
+        #print "COMPILER STDERR: ", compile_out[1]
         return compile_out[1]
         
     def check_compile_result(self):
         import os
-        if os.path.exists(RUNS_PATH + str(self.pk) + '.exe') == 0:
+        if os.path.exists(JAIL + str(self.pk) + '.exe') == 0:
             self.result = 'CMPE'
             self.save()
             return False

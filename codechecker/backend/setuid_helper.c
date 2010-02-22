@@ -47,14 +47,20 @@ int main(int argc, char* argv[]) {
   }
   int status;
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
-  if(argv[1][0] == '1') 
-    fprintf(fp, "submission %s status = %d\n", argv[2], status);
-  
   wait(&status);
+  if(argv[1][0] == '1') 
+    fprintf(fp, "submission %s status = %d\n", argv[2], status);  
   if (WIFSIGNALED(status)) {
     if(argv[1][0] == '1') 
       fprintf(fp, "submission %s signalled status = %d\n", argv[2], status);
   }
-  fclose(fp);
+  if (WIFEXITED(status)) {
+    if(argv[1][0] == '1') 
+      fprintf(fp, "child %s exited normally with status = %d\n", argv[2], WEXITSTATUS(status));
+    return WEXITSTATUS(status);
+  }
+  if(argv[1][0] == '1') 
+    fprintf(fp, "child %s did not exit normally and did not get"
+	    " signalled, exited with status = %d\n", argv[2], status);
   return status;
 }

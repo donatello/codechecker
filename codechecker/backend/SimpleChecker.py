@@ -27,7 +27,9 @@ def run(submission, testcase):
     prob = Problem.objects.get(id=submission.problem_id)
 
     file_root = RUNS_PATH + str(submission.pk)
-    exec_file = JAIL + str(submission.pk)
+    exec_path = JAIL + str(submission.pk)
+    exec_file = "/" + str(submission.pk) + ".exe"
+    print "exec_file = ", exec_file
     
     tlimit = prob.tlimit
     mlimit = prob.mlimit
@@ -116,9 +118,9 @@ def run(submission, testcase):
 
         instream = open(infile,'r')        
         outstream = open(outfile,'w')
-        os.chmod(outfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_ROTH)
+        os.chmod(outfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
         errorstream = open(errorfile,'w')
-        os.chmod(errorfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_ROTH)
+        os.chmod(errorfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
 
         log('Running in executable %s with input file as %s ' % (exec_file,infile))
 
