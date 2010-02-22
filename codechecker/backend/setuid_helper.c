@@ -11,40 +11,48 @@ jail. This should be owned by the codechecker user and not writable
 by the user the submission is going to run as.
 */
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <signal.h>
 
+static void alarm_handler(int signo) 
+{
+  /* its time to kill the child now! */
+  kill(0, SIGKILL);
+}
 
+struct sigaction alarm_act;
 int main(int argc, char* argv[]) {
   // fork argv[1]
   pid_t p = fork();
   if (!p) { 
-    //place submission in a chroot jail.
-    char jail[] = "/opt/checker/codechecker/backend/submissions/jail/";
-    chroot(jail);
-    chdir("/");
-    
     //drop priveleges
     setuid(1002);    
     struct rlimit lim ;
     // set limit on number of forks possible.
     lim.rlim_cur = lim.rlim_max = 0; 
     int ret = setrlimit(RLIMIT_NPROC, &lim);
-    
     //set limit on the number of files that can be opened.
     //lim.rlim_cur = lim.rlim_max = 3;
     //ret = setrlimit(RLIMIT_NOFILE, &lim);
 
-    //		printf("ret = %d\n", ret);
     ret = execvp(argv[2], NULL);    
+    printf("ret = %d and errno = %d\n", ret, errno);
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
     return 111;
   }
+
+  /* setting up an alarm for 2 seconds */
+  alarm_act.sa_handler = alarm_handler;
+  sigaction(SIGALRM, &alarm_act, NULL);
+  alarm(2); 
+
   int status;
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
   wait(&status);

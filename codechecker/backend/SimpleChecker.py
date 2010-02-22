@@ -17,7 +17,6 @@ from django.contrib.auth.models import User
 from codechecker.Logger import *
 
 RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
-JAIL = '/opt/checker/codechecker/backend/submissions/jail/'
 OUTPUT_FILE_SIZE = int(64 << 20)    #max 64 MB
 HANG_TIME = 1
 
@@ -27,8 +26,7 @@ def run(submission, testcase):
     prob = Problem.objects.get(id=submission.problem_id)
 
     file_root = RUNS_PATH + str(submission.pk)
-    exec_path = JAIL + str(submission.pk)
-    exec_file = "/" + str(submission.pk) + ".exe"
+    exec_file = RUNS_PATH + str(submission.pk) + ".exe"
     print "exec_file = ", exec_file
     
     tlimit = prob.tlimit

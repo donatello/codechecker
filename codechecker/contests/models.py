@@ -30,7 +30,6 @@ RESULT_TYPES = (
 )
 
 RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
-JAIL = '/opt/checker/codechecker/backend/submissions/jail/'
 
 class Contest(models.Model):
     title = models.CharField(max_length = 25)
@@ -82,7 +81,7 @@ class Submission(models.Model):
     # exported interface (i think).
     def _generate_compile_command(self):
         s = str('')
-        file_root = JAIL + str(self.pk) 
+        file_root = RUNS_PATH + str(self.pk) 
 
         if self.get_submissionLang_display() == 'C++':
             s = ('g++  -Wall -o ' + str(file_root)  + '.exe ' + 
@@ -108,7 +107,7 @@ class Submission(models.Model):
             return "c"
 
     def write_code_to_disk(self):
-        f = open(JAIL + str(self.pk) + '.' + self._get_filename_extension(),'w')
+        f = open(RUNS_PATH + str(self.pk) + '.' + self._get_filename_extension(),'w')
         f.write(self.submissionCode)
         f.close()
 
@@ -124,7 +123,7 @@ class Submission(models.Model):
         
     def check_compile_result(self):
         import os
-        if os.path.exists(JAIL + str(self.pk) + '.exe') == 0:
+        if os.path.exists(RUNS_PATH + str(self.pk) + '.exe') == 0:
             self.result = 'CMPE'
             self.save()
             return False
