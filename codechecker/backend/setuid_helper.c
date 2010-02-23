@@ -39,12 +39,11 @@ int main(int argc, char* argv[]) {
     // set limit on number of forks possible.
     lim.rlim_cur = lim.rlim_max = 0; 
     int ret = setrlimit(RLIMIT_NPROC, &lim);
-    //set limit on the number of files that can be opened.
-    //lim.rlim_cur = lim.rlim_max = 3;
-    //ret = setrlimit(RLIMIT_NOFILE, &lim);
+
+    lim.rlim_cur = lim.rlim_max = 64<<20;
+    ret = setrlimit(RLIMIT_AS, &lim);
 
     ret = execvp(argv[2], NULL);    
-    printf("ret = %d and errno = %d\n", ret, errno);
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
     return 111;
@@ -62,7 +61,8 @@ int main(int argc, char* argv[]) {
     fprintf(fp, "submission %s status = %d\n", argv[2], status);  
   if (WIFSIGNALED(status)) {
     if(argv[1][0] == '1') 
-      fprintf(fp, "submission %s signalled status = %d\n", argv[2], status);
+      fprintf(fp, "submission %s signalled status = %d\n", argv[2], WTERMSIG(status));
+    return WTERMSIG(status);
   }
   if (WIFEXITED(status)) {
     if(argv[1][0] == '1') 
