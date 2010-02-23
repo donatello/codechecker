@@ -130,12 +130,14 @@ def change_password(request):
     if request.POST :
         form = ChangePasswordForm(request.POST)
         if form.is_valid():
+            fm = form.cleaned_data
             user = User.objects.get(pk=request.user.id)
             if fm.get('pass1') and fm.get('pass2') :
                 user.set_password(fm['pass1'])
             user.save()
-            return HttpResponseRedirect('/site/')
+            
+            return render_to_response("accounts/pchange.html", {"message" : "Password has been Saved successfully and account activated Successfully"}, context_instance=Context(request))
     else :
         form = ChangePasswordForm()
     
-    return render_to_response("accounts/register.html", {"form": form }, context_instance=Context(request))
+    return render_to_response("accounts/pchange.html", {"form": form , "message" : "Please choose a password of your choice to complete Registration"}, context_instance=Context(request))
