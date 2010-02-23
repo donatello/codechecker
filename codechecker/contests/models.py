@@ -70,7 +70,7 @@ class Submission(models.Model):
     result = models.CharField(max_length=4, choices=RESULT_TYPES, default="QU")
     submissionTime = models.DateTimeField(default=datetime.datetime.now())
     submissionLang = models.CharField(max_length=10, choices=LANG_TYPES)
-    submissionPenalty = models.IntegerField(default=-1)
+    submissionPenalty = models.IntegerField(default=0)
     submissionPoints = models.IntegerField(default=0)
     submissionCode = models.TextField()    
     

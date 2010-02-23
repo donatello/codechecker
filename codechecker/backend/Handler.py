@@ -70,6 +70,10 @@ def handle_submission( submission ):
     if not(submission.check_compile_result()):
         log(compiler_out)
         log("Compilation failure #%s\n" % str(submission.pk))
+        #set the points and penalty for the submission
+        submission.submissionPoints = 0
+        submission.submissionPenalty = 20
+        submission.save()
         return
 
     # Compilation is successful. So proceeding.
