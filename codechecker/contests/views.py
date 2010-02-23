@@ -219,6 +219,7 @@ def problem_view_handle(request, problem_id, action='view'):
     vars['tlimit'] = problem.tlimit
     vars['mlimit'] = problem.mlimit
 
+
     context = Context(request, vars)
     template = loader.get_template('problem.html')
     return HttpResponse(template.render(context))

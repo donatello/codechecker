@@ -85,3 +85,10 @@ INSTALLED_APPS = (
 #Codecheker specific Changes 
 LOGIN_URL = '/site/login/'
 LOGIN_REDIRECT_URL = '/site/'
+DEFAULT_FROM_EMAIL = 'projectjeeves@gmail.com'
+SERVER_EMAIL = 'projectjeeves@gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'projectjeeves@gmail.com'
+EMAIL_HOST_PASSWORD = 'rosesarered'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

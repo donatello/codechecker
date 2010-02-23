@@ -17,9 +17,11 @@ urlpatterns = patterns('',
 
     # default Generic Views
     (r'^$', 'codechecker.generic_views.default'),
-    (r'^about/', 'codechecker.generic_views.default', { 'action' : 'about'}),
-    (r'^references/', 'codechecker.generic_views.default', { 'action' : 'references'}),
-    
+    (r'^about/$', 'codechecker.generic_views.default', { 'action' : 'about'}),
+    (r'^references/$', 'codechecker.generic_views.default', { 'action' : 'references'}),
+    (r'^register/$', 'codechecker.generic_views.register'),
+    (r'^activate/(?P<code>\d+)/$', 'codechecker.generic_views.activate'),
+    (r'^change-password-first-time/$', 'codechecker.generic_views.change_password'),
     # User Related Views
     (r'login/$', 'django.contrib.auth.views.login', { 'template_name' : 'accounts/login.html', }),
     (r'logout/$', 'django.contrib.auth.views.logout', { 'next_page' : '/site/', }), 
