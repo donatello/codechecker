@@ -1,14 +1,19 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import RequestContext as Context
-from django.template import loader
+from django.template import RequestContext as Context, loader
 from django.shortcuts import render_to_response
-from codechecker.contests.models import TempReg, TempRegForm, Team, ChangePasswordForm
-from codechecker import settings
 from django.core.mail import send_mail,EmailMessage
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login
 import random, time, datetime, re
+
+from codechecker.contests.models import TempReg, TempRegForm, Team, ChangePasswordForm
+from codechecker import settings
+
+def debug(obj):
+    import sys
+    print >> sys.stderr,'[debug] ' + repr(obj)
+    sys.stderr.flush()
 
 def default(request, action='base'):
     template = loader.get_template(action + ".html")
@@ -98,10 +103,21 @@ def activate(request, code):
                 data['email'] = user.primary_email
                 data['code'] = user.code
                 data['username'] = user.name
+                new_team = Team(name=user.name, teamSize = user.teamSize, 
+                        primary_email = user.primary_email,
+                        primary = user.primary,
+                        secondary_email = user.secondary_email,
+                        secondary = user.secondary,
+                        tertiary_email = user.tertiary_email,
+                        tertiary = user.tertiary,
+                        )
                 user.delete()
 
                 new_user = User.objects.create_user(username = data['username'], email = data['email'], password = data['code'])
                 new_user.save()
+                new_user = User.objects.get(username = data['username'])
+                new_team.user = new_user
+                new_team.save()
                 user = authenticate(username=data['username'], password=data['code'])
                 login(request,user)
                 
@@ -122,4 +138,4 @@ def change_password(request):
     else :
         form = ChangePasswordForm()
     
-    return render_to_response("/site/", {"form": form }, context_instance=Context(request))
+    return render_to_response("accounts/register.html", {"form": form }, context_instance=Context(request))

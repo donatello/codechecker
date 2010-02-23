@@ -1,15 +1,12 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.template import RequestContext as Context
-from django.template import loader
-from codechecker.contests.models import *
+from django.template import RequestContext as Context, loader
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import authenticate, login
 import time
 
-def debug(obj):
-    import sys
-    print >> sys.stderr,'[debug] ' + repr(obj)
-    sys.stderr.flush()
+from codechecker.contests.models import *
 
 def format_time(t):
     ti = time.strptime(str(t),'%Y-%m-%d %H:%M:%S')
