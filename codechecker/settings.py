@@ -95,6 +95,8 @@ EMAIL_HOST_PASSWORD = 'rosesarered'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+#Edit this to be your hostname instance that goes in the confirmation mail 
+HOST = 'guesthost'
 
 
 

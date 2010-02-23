@@ -81,7 +81,7 @@ def register(request):
                 new_reg = form.save()
                 new_reg.code = str(random.random())[2:]
                 new_reg.save()
-                url = 'http://guesthost/site/activate/' + new_reg.code
+                url = 'http://' + settins.HOST +  '/site/activate/' + new_reg.code
                 mg = makemsg(new_reg.name, url)
                 subject = "Confirm Registration for your login at Codelabs" 
                 frm = settings.DEFAULT_FROM_EMAIL
