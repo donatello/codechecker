@@ -105,7 +105,7 @@ def activate(request, code):
                 user = authenticate(username=data['username'], password=data['code'])
                 login(request,user)
                 
-                return HttpResponseRedirect('/site/change-password-first-time/') 
+                return HttpResponseRedirect('/site/change_password_first_time/') 
 
     return render_to_response("accounts/register.html", {'message' : 'Sorry ! No valid Key given'})
 
