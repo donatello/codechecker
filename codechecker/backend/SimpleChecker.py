@@ -29,9 +29,6 @@ def run(submission, testcase):
     exec_file = RUNS_PATH + str(submission.pk) + ".exe"
     print "exec_file = ", exec_file
     
-    tlimit = prob.tlimit
-    mlimit = prob.mlimit
-    
     # Create the input file.    
     infile = str(file_root + '.in')
     f = open(infile, "w")
@@ -123,7 +120,7 @@ def run(submission, testcase):
         log('Running in executable %s with input file as %s ' % (exec_file,infile))
 
         tlimit = prob.tlimit
-        mlimit = prob.mlimit*1024*1024
+        mlimit = prob.mlimit
 
         #set the time limit for the problem execution
         resource.setrlimit(resource.RLIMIT_CPU,(tlimit,tlimit+1))
@@ -140,7 +137,10 @@ def run(submission, testcase):
         # to it along with the file descriptors for the streams. This
         # will let the OS handle buffering of I/O.
         helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", 
-                                         str(get_log_level()), exec_file],
+                                         "debug=%s" % str(get_log_level()),
+                                         "memlimit=%d" % mlimit,
+                                         "timelimit=%d" % tlimit,
+                                         exec_file],
                                         stdin = instream,
                                         stdout = outstream,
                                         stderr = errorstream)
