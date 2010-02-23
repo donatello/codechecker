@@ -29,8 +29,20 @@ def handle_simple_checker(submission):
     if submission.result == "RUN":
         submission.result = "ACC"
         submission.save()
-        # TODO - add points for the team, etc.
-        pass
+
+        # set points for the submission
+        submission.submissionPoints = Problem.objects.get(id = submission.problem_id
+                                                          ).maxScore        
+        # set the penalty for the submission
+        contestid = Problem.objects.get(id = submission.problem_id).contest_id
+        contest = Contest.objects.get(id = contestid)
+        tdelta = submission.submissionTime - contest.startDateTime
+        minutes = tdelta.days*24*60 + tdelta.seconds/60
+        submission.submissionPenalty = minutes
+    else:
+        #set the points for the submission
+        submission.submissionPoints = 0
+        submission.submissionPenalty = 20
         
 # The 'submission' argument is a model-instance (not a dictionary).
 def handle_submission( submission ):

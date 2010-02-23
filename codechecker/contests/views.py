@@ -117,14 +117,6 @@ def show_ranklist(request, contest):
                 user_solvedprobs[sub.user_id].add(sub.problem_id)
             else:
                 user_solvedprobs[sub.user_id] = Set([sub.problem_id])
-
-            tdelta = sub.submissionTime - contest.startDateTime
-            minutes = tdelta.days*24*60 + tdelta.seconds/60
-            if sub.user_id in user_penalty:
-                user_penalty[sub.user_id] += minutes
-            else:
-                user_penalty[sub.user_id] = minutes
-    
     
     for sub in subs:
         if sub.user_id in user_solvedprobs and sub.problem_id in user_solvedprobs[sub.user_id]:
