@@ -19,6 +19,9 @@ by the user the submission is going to run as.
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
+#include <string.h>
+
+#define NO_OPTS 3
 
 pid_t p;
 
@@ -29,7 +32,22 @@ static void alarm_handler(int signo)
 }
 
 struct sigaction alarm_act;
+char *opts[NO_OPTS] = {"debug", "memlimit", "timelimit"};
+
 int main(int argc, char* argv[]) {
+/* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB> 
+  No error checking done, since this will be run only by the Code checker. */
+
+  int i, debug, memlimit, timelimit;
+  for(i=1; i< argc; i++) 
+  {
+    char *name = strtok(argv[i], "="),
+         *value = strtok(NULL, "=");
+    if (!strncmp(name, opts[0], strlen(opts[0]))) debug = value[0] - '0';
+    else if (!strncmp(name, opts[1], strlen(opts[1]))) memlimit = atoi(value);
+    else if (!strncmp(name, opts[2], strlen(opts[2]))) timelimit = atoi(value);
+  }
+
   // fork argv[1]
   p = fork();
   if (!p) { 
@@ -40,37 +58,37 @@ int main(int argc, char* argv[]) {
     lim.rlim_cur = lim.rlim_max = 0; 
     int ret = setrlimit(RLIMIT_NPROC, &lim);
 
-    lim.rlim_cur = lim.rlim_max = 64<<20;
+    lim.rlim_cur = lim.rlim_max = memlimit << 20;
     ret = setrlimit(RLIMIT_AS, &lim);
 
-    ret = execvp(argv[2], NULL);    
+    ret = execvp(argv[argc-1], NULL);    
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
     return 111;
   }
 
-  /* setting up an alarm for 2 seconds */
+  /* setting up an alarm for 'timelimit+2' seconds, since it includes CPU and I/O time */
   alarm_act.sa_handler = alarm_handler;
   sigaction(SIGALRM, &alarm_act, NULL);
-  alarm(2); 
+  alarm(timelimit+2); 
 
   int status;
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
   wait(&status);
-  if(argv[1][0] == '1') 
-    fprintf(fp, "submission %s status = %d\n", argv[2], status);  
+  if(debug) 
+    fprintf(fp, "submission %s status = %d\n", argv[argc-1], status);  
   if (WIFSIGNALED(status)) {
-    if(argv[1][0] == '1') 
-      fprintf(fp, "submission %s signalled status = %d\n", argv[2], WTERMSIG(status));
+    if(debug) 
+      fprintf(fp, "submission %s signalled status = %d\n", argv[argc-1], WTERMSIG(status));
     return WTERMSIG(status);
   }
   if (WIFEXITED(status)) {
-    if(argv[1][0] == '1') 
-      fprintf(fp, "child %s exited normally with status = %d\n", argv[2], WEXITSTATUS(status));
+    if(debug) 
+      fprintf(fp, "child %s exited normally with status = %d\n", argv[argc-1], WEXITSTATUS(status));
     return WEXITSTATUS(status);
   }
-  if(argv[1][0] == '1') 
+  if(debug) 
     fprintf(fp, "child %s did not exit normally and did not get"
-	    " signalled, exited with status = %d\n", argv[2], status);
+	    " signalled, exited with status = %d\n", argv[argc-1], status);
   return status;
 }
