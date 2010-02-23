@@ -3,7 +3,6 @@ from django.template import RequestContext as Context
 from django.template import loader
 from django.shortcuts import render_to_response
 from codechecker.contests.models import TempReg, TempRegForm, Team, ChangePasswordForm
-from codechecker.contests.views import debug
 from codechecker import settings
 from django.core.mail import send_mail,EmailMessage
 from django.contrib.auth.models import User

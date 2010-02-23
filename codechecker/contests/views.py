@@ -6,8 +6,6 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
 import time
 
-from codechecker.Logger import log
-
 def debug(obj):
     import sys
     print >> sys.stderr,'[debug] ' + repr(obj)
