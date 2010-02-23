@@ -57,6 +57,10 @@
                 {% endblock %}        
             </div>
             <div class="header">
+                {% block errors %}
+                <h4> {{ errors }} </h4>
+                {% endblock %}
+                
                 {% block header %}
                 <h3>
                     Welcome to CodeLabs !     

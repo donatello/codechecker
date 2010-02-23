@@ -1,9 +1,8 @@
 {% extends 'table.html' %}
 
 {% block header %}
-<h3> Contest: {{ title }} </h3>
+<h3> Contest : {{ title }} </h3>
 {% endblock %}
-
 {% block links %}
 <div id="links">
     <a href = "/site/contests/{{ contest }}/description/" id="description">Description</a>
@@ -27,3 +26,4 @@
 {% endifnotequal %}
 
 {% endblock %}
+

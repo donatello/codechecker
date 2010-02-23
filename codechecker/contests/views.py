@@ -4,9 +4,11 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login
-import time
+import time, datetime
 
 from codechecker.contests.models import *
+
+CONTEST_NOT_BEGUN = "Contest Has not Begun Yet, Please revisit after the contest starting time"
 
 def format_time(t):
     ti = time.strptime(str(t),'%Y-%m-%d %H:%M:%S')
@@ -183,19 +185,32 @@ def show_ranklist(request, contest):
 
 def contest_view_handle(request, contest_id, action='description'):
     vars = {}
+    
+    # Get the respective Contest
     contest = Contest.objects.get(pk=contest_id)
-    vars['contest'] = contest.pk
-    vars['section'] = action 
-    vars['description'] = contest.description
+    
+     #Get the Current Time 
+    current_time = datetime.datetime.now()
+    
     vars['title'] = contest.title
-
-    if action == 'problems' :
+    vars['contest'] = contest.pk
+    vars['section'] = action
+    
+    if action == 'description':
+        vars['description'] = contest.description
+    
+    elif action == 'problems' :
         problem_vars =  show_all_problems(request, contest)
         vars.update(problem_vars)
-
-    elif action == 'ranklist':
-        ranklist_vars =  show_ranklist(request, contest)
-        vars.update(ranklist_vars)
+    
+     # If the person is not admin or if the contest has not begun, dont show the problem
+    if not request.user.is_superuser or current_time < contest.startDateTime :
+        vars['errors'] = CONTEST_NOT_BEGUN
+   
+    else :    
+        if action == 'ranklist':
+            ranklist_vars =  show_ranklist(request, contest)
+            vars.update(ranklist_vars)
 
     context = Context(request, vars)
     template = loader.get_template('contest.html')
@@ -203,17 +218,30 @@ def contest_view_handle(request, contest_id, action='description'):
 
 def problem_view_handle(request, problem_id, action='view'):
     vars = { }
+    # Get the respective Problem and the contest 
     problem = Problem.objects.get(pk=problem_id)
-    vars['problem'] = problem.pk
-    vars['problem_code'] = problem.problemCode
-    vars['section'] = action
-    vars['problem_statement'] = problem.problemStatement
-    vars['problem_notes'] = problem.problemNotes
-    vars['input_data'] = problem.inputData
-    vars['output_data'] = problem.outputData
-    vars['tlimit'] = problem.tlimit
-    vars['mlimit'] = problem.mlimit
+    contest = problem.contest
+    
+    #Get the Current Time    
+    current_time = datetime.datetime.now()
 
+    # If the person is not admin or if the contest has not begun, dont show the problem
+    if not request.user.is_superuser or current_time < contest.startDateTime :       
+        vars['errors'] = CONTEST_NOT_BEGUN
+        vars['problem_code'] = problem.problemCode
+        vars['section'] = action
+        vars['problem'] = problem.pk
+    else :
+        # Get all the problem parameters 
+        vars['problem'] = problem.pk
+        vars['problem_code'] = problem.problemCode
+        vars['section'] = action
+        vars['problem_statement'] = problem.problemStatement
+        vars['problem_notes'] = problem.problemNotes
+        vars['input_data'] = problem.inputData
+        vars['output_data'] = problem.outputData
+        vars['tlimit'] = problem.tlimit
+        vars['mlimit'] = problem.mlimit
 
     context = Context(request, vars)
     template = loader.get_template('problem.html')
@@ -222,21 +250,32 @@ def problem_view_handle(request, problem_id, action='view'):
 @login_required(redirect_field_name='next')
 def problem_submit(request, problem_id) :
     vars = {}
+     # Get the respective Problem and the contest 
     problem = Problem.objects.get(pk=problem_id)
-    if request.method == 'POST' :
-        form = SubmissionForm(request.POST)
-        if form.is_valid():
-            submission = Submission( problem = problem , 
-                    user = request.user, 
-                    submissionLang = form.cleaned_data['SubmissionLang'], 
-                    submissionCode = form.cleaned_data['SubmissionCode'])
-            submission.save()
-            return HttpResponseRedirect('/site/submissions/')
-
+    contest = problem.contest
+    
+    #Get the Current Time    
+    current_time = datetime.datetime.now()
+    
     vars['problem'] = problem.pk
     vars['problem_code'] = problem.problemCode
     vars['section'] = 'submit'
-    vars['form'] = SubmissionForm()
+    
+    if not request.user.is_superuser or current_time < contest.startDateTime :
+        vars['errors'] = CONTEST_NOT_BEGUN
+    else :
+        if request.method == 'POST' :
+            form = SubmissionForm(request.POST)
+            if form.is_valid():
+                submission = Submission( problem = problem , 
+                        user = request.user, 
+                        submissionLang = form.cleaned_data['SubmissionLang'], 
+                        submissionCode = form.cleaned_data['SubmissionCode'])
+                submission.save()
+                return HttpResponseRedirect('/site/submissions/')
+
+            
+        vars['form'] = SubmissionForm()
 
     context = Context(request, vars)
     template = loader.get_template('problem.html')
