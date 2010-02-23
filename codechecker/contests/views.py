@@ -86,7 +86,27 @@ def ranklist_cmp(userA, userB):
     if userA[1] != userB[1]:
         return userB[1] - userA[1]
     return userA[2] - userB[2]
-    
+
+"""
+Ranklist Algorithm:
+
+We consider only submissions during a contest for problems in that
+contest for the ranklist. The SCORE for each user is the sum of scores
+for all problems. The score for a problem is full points if it is ACC
+and 0 otherwise. The PENALTY for a user is the sum of the penalties
+for each problem.  The penalty for a problem is 0 if the problem has
+not been solved. If the problem is solved, the penalty is the number
+minutes since the start of the contest when the first ACC solution
+submitted, with an additional 20 minutes penalty for each unsuccessful
+submission for that problem.
+
+The ranklist is simply got by sorting the users with SCORE descending
+and PENALTY ascending.
+
+TODO: There is currently a small bug in the ranklist implementation
+below. If a user resubmits a problem that is already solved during the
+contest, it will add points in the ranklist. This bug has to be fixed!
+"""    
 def show_ranklist(request, contest):
     vars = { }
     vars['category'] = 'Ranklist'
