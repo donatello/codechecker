@@ -155,11 +155,7 @@ def show_ranklist(request, contest):
                 rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
             else:
                 rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
-        rows.append(rowItem)
-
-    if len(rows) == 1:
-        raise KeyError
-
+        rows.append({'items': rowItem})
 
     vars['rows'] = rows
 

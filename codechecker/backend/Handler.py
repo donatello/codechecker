@@ -13,18 +13,6 @@ RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
 
 def handle_simple_checker(submission):
     tests = TestCase.objects.filter(problem=submission.problem)
-
-#     contestid = Problem.objects.get(id = submission.problem_id).contest_id
-#     contest = Contest.objects.get(id = contestid)
-#     subs = Submission.objects.filter(submissionTime__gte=contest.startDateTime
-#                                      ).filter(submissionTime__lte=contest.endDateTime
-#                                               ).filter(problem__contest__exact = contest.id)
-#     distinct_tuples = subs.values_list('user_id').distinct()
-#     distinct_users = []
-#     for tuple in distinct_tuples:
-#         distinct_users.append(int(tuple[0]))
-#     print "distinct users", distinct_users
-
     
     # set submission status to running
     submission.result = "RUN"
