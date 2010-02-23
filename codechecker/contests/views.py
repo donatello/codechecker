@@ -183,6 +183,52 @@ def show_ranklist(request, contest):
 
     return vars    
 
+# This is my Ranklist view, Didn't want to disturb aditya's logic, so branched out  
+# THIS IS COMPLETLY UNTESTED CODE  
+def generate_rank_list(request, contest_id):
+    # Get All the problems for this contest 
+    problems = Problems.objects.filter(contest=contest_id).order_by('problem_code')
+    
+    # Get all the submissions for this contest
+    submissions = Submission.objects.filter(submissionTime__gte=contest.startDateTime
+                                     ).filter(submissionTime__lte=contest.endDateTime
+                                              ).filter(problem__contest = contest.id)
+                                              
+    # Get All the Users Participated in this Contest 
+    #This is why I love Python List Comprehensions
+    users = Set([ submission.user for submission in submissions])
+    
+    users_list = [ ]
+    for user in users :
+        user_submissions = submissions.filter(user=user.id)
+        user_points = []
+        for problem in problems :
+              problem_submissions = user_submissions.filter(problem=problem.pk)
+              first_accepted = problem_submissions.filter(result='ACC').order_by('submissionTime')[0]
+              if first_accepted :
+                penalizable = problem_submissions.filter(submissionTime_lte=first_accepted.submissionTime)
+              else :
+                penalizable = problem_submissions
+              
+              #calculate the points and penalty here
+              points = 0
+              penalty = 0
+              
+              #append the points,penalty tuple to user points
+              user_points.append((points, penalty))
+              
+         #append the sum of points and penalty tuple
+         user_points.append( (sum(x),sum(y)) for (x,y) in user_points )
+         users_list.append(user_points)
+    
+    # sort the ranking list that has just been obtained
+    sort(users_list, rankingCmp)
+    
+    #Generate rows and colums now 
+    
+    #return Context now 
+     
+     
 def contest_view_handle(request, contest_id, action='description'):
     vars = {}
     
@@ -296,7 +342,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
     else :
         all_submissions = Submission.objects.order_by('-pk').all()
 
-    if request.path.find("my_submissions") != -1 :
+    if request.path.find("my_submissions") != -1 or user_context != None :
         if not request.user.is_authenticated() :
             return HttpResponseRedirect('/site/login/?next=' + request.path)
         all_submissions = all_submissions.filter(user=request.user)
