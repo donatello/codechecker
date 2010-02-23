@@ -84,16 +84,17 @@ def show_all_problems(request, contest = -1):
 
 def ranklist_cmp(userA, userB):
     if userA[1] != userB[1]:
-        return userA[1] - userB[1]
-    return userB[2] - userA[2]
+        return userB[1] - userA[1]
+    return userA[2] - userB[2]
     
 def show_ranklist(request, contest):
     vars = { }
     vars['category'] = 'Ranklist'
 
     problems =  Problem.objects.filter(contest=contest).values( 'pk', 'problemCode', 'maxScore' )
-    vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
 
+    # form the column headers of the ranklist
+    vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
     for problem in problems:
         vars['columns'].append( { 'name' : problem['problemCode'], 
                                   'link' : '/site/problems/' + str(problem['pk']) +'/' })
@@ -104,7 +105,7 @@ def show_ranklist(request, contest):
                                      ).filter(submissionTime__lte=contest.endDateTime
                                               ).filter(problem__contest__exact = contest.id)
 
-    #log("subs count = %d" % len(subs))
+    # log("subs count = %d" % len(subs))
 
     # form (user -> solved problems), (user -> total scores) and (user ->
     # penalty) mappings.
@@ -112,22 +113,26 @@ def show_ranklist(request, contest):
     user_scores = {}
     user_penalty = {}
     for sub in subs:
-        try:
-            user_scores[sub.user_id] += sub.submissionPoints
-        except KeyError:
-            user_scores[sub.user_id] = sub.submissionPoints
+        # insert user into score mapping with 0 points first.
+        if not(sub.user_id in user_scores):
+            user_scores[sub.user_id] = 0
+        # insert user into penalty mapping with 0 penalty first.
+        if not(sub.user_id in user_penalty):
+            user_penalty[sub.user_id] = 0
+        # insert user into solvedprobs mapping with empty set first.
+        if not(sub.user_id in user_solvedprobs):
+            user_solvedprobs[sub.user_id] = set([])
+        
+        # add submission points
+        user_scores[sub.user_id] += sub.submissionPoints
+        # add solved problem into solvedprobs mapping.
         if sub.result == 'ACC':
-            if sub.user_id in user_solvedprobs:
-                user_solvedprobs[sub.user_id].add(sub.problem_id)
-            else:
-                user_solvedprobs[sub.user_id] = set([sub.problem_id])
-    
+            user_solvedprobs[sub.user_id].add(sub.problem_id)
+
+    # now accumulate penalties for solved problems only.
     for sub in subs:
-        if sub.user_id in user_solvedprobs and sub.problem_id in user_solvedprobs[sub.user_id]:
-            if sub.user_id in user_penalty:
-                user_penalty[sub.user_id] += sub.submissionPenalty
-            else:
-                user_penalty[sub.user_id] = sub.submissionPenalty
+        if sub.problem_id in user_solvedprobs[sub.user_id]:
+            user_penalty[sub.user_id] += sub.submissionPenalty
 
     # now sort the users according to the ranking ordering -> sort by
     # scores descending, and break ties by penalties ascending.
@@ -135,9 +140,7 @@ def show_ranklist(request, contest):
     user_tuples = []
     for user in distinct_users:
         u = int(user[0])
-        score, penalty = 0,0
-        if u in user_scores: score = user_scores[u]
-        if u in user_penalty: penalty = user_penalty[u]
+        score, penalty = int(user_scores[u]),int(user_penalty[u])
         user_tuples.append([u, score, penalty])
         
     sorted_users = sorted(user_tuples, ranklist_cmp)
@@ -151,6 +154,7 @@ def show_ranklist(request, contest):
         rowItem.append( { 'value': user_penalty[user[0]] })
         for problem in problems:
             attempts = subs.filter(problem = problem['pk']).filter(id = user[0])
+            if len(attempts) == 0: raise KeyError
             if problem['pk'] in user_solvedprobs[user[0]]:
                 rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
             else:
