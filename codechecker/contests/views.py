@@ -136,10 +136,10 @@ def show_ranklist(request, contest):
 
     # now sort the users according to the ranking ordering -> sort by
     # scores descending, and break ties by penalties ascending.
-    distinct_users = subs.values_list('user_id').distinct()
+    distinct_users = user_scores.keys()
     user_tuples = []
     for user in distinct_users:
-        u = int(user[0])
+        u = int(user)
         score, penalty = int(user_scores[u]),int(user_penalty[u])
         user_tuples.append([u, score, penalty])
         
@@ -153,12 +153,13 @@ def show_ranklist(request, contest):
         rowItem.append( { 'value': user_scores[user[0]] })
         rowItem.append( { 'value': user_penalty[user[0]] })
         for problem in problems:
-            attempts = subs.filter(problem = problem['pk']).filter(id = user[0])
-            if len(attempts) == 0: raise KeyError
+            attempts = subs.filter(problem = problem['pk']).filter(user = user[0])
             if problem['pk'] in user_solvedprobs[user[0]]:
                 rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
-            else:
+            elif len(attempts) != 0:
                 rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
+            else:
+                rowItem.append( { 'value': '--'})
         rows.append({'items': rowItem})
 
     vars['rows'] = rows
