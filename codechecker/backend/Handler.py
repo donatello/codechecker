@@ -3,7 +3,7 @@ import sys
 import time
 import string
 
-from codechecker.contests.models import Submission,Problem,TestCase
+from codechecker.contests.models import Submission,Problem,TestCase,Contest
 import SimpleChecker
 from codechecker.Logger import log
 #import MultipleChecker
@@ -13,6 +13,18 @@ RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
 
 def handle_simple_checker(submission):
     tests = TestCase.objects.filter(problem=submission.problem)
+
+#     contestid = Problem.objects.get(id = submission.problem_id).contest_id
+#     contest = Contest.objects.get(id = contestid)
+#     subs = Submission.objects.filter(submissionTime__gte=contest.startDateTime
+#                                      ).filter(submissionTime__lte=contest.endDateTime
+#                                               ).filter(problem__contest__exact = contest.id)
+#     distinct_tuples = subs.values_list('user_id').distinct()
+#     distinct_users = []
+#     for tuple in distinct_tuples:
+#         distinct_users.append(int(tuple[0]))
+#     print "distinct users", distinct_users
+
     
     # set submission status to running
     submission.result = "RUN"
@@ -28,7 +40,6 @@ def handle_simple_checker(submission):
         
     if submission.result == "RUN":
         submission.result = "ACC"
-        submission.save()
 
         # set points for the submission
         submission.submissionPoints = Problem.objects.get(id = submission.problem_id
@@ -40,9 +51,11 @@ def handle_simple_checker(submission):
         minutes = tdelta.days*24*60 + tdelta.seconds/60
         submission.submissionPenalty = minutes
     else:
-        #set the points for the submission
+        #set the points and penalty for the submission
         submission.submissionPoints = 0
         submission.submissionPenalty = 20
+
+    submission.save()
         
 # The 'submission' argument is a model-instance (not a dictionary).
 def handle_submission( submission ):

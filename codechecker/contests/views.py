@@ -6,6 +6,8 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
 import time
 
+from codechecker.Logger import log
+
 def debug(obj):
     import sys
     print >> sys.stderr,'[debug] ' + repr(obj)
@@ -102,6 +104,8 @@ def show_ranklist(request, contest):
                                      ).filter(submissionTime__lte=contest.endDateTime
                                               ).filter(problem__contest__exact = contest.id)
 
+    #log("subs count = %d" % len(subs))
+
     # form (user -> solved problems), (user -> total scores) and (user ->
     # penalty) mappings.
     user_solvedprobs = {}    
@@ -116,7 +120,7 @@ def show_ranklist(request, contest):
             if sub.user_id in user_solvedprobs:
                 user_solvedprobs[sub.user_id].add(sub.problem_id)
             else:
-                user_solvedprobs[sub.user_id] = Set([sub.problem_id])
+                user_solvedprobs[sub.user_id] = set([sub.problem_id])
     
     for sub in subs:
         if sub.user_id in user_solvedprobs and sub.problem_id in user_solvedprobs[sub.user_id]:
@@ -130,28 +134,32 @@ def show_ranklist(request, contest):
     distinct_users = subs.values_list('user_id').distinct()
     user_tuples = []
     for user in distinct_users:
+        u = int(user[0])
         score, penalty = 0,0
-        if user in user_scores: score = user_scores[user]
-        if user in user_penalty: penalty = user_penalty[user]
-        user_tuples.append([user, score, penalty])
+        if u in user_scores: score = user_scores[u]
+        if u in user_penalty: penalty = user_penalty[u]
+        user_tuples.append([u, score, penalty])
         
     sorted_users = sorted(user_tuples, ranklist_cmp)
-
 
     # now form the remaining rows of the ranklist
     rows = []
     for user in sorted_users:
         rowItem = []
-        rowItem.append( { 'value': Users.objects.get(id = user[0]).username})
+        rowItem.append( { 'value': User.objects.get(id = user[0]).username})
         rowItem.append( { 'value': user_scores[user[0]] })
         rowItem.append( { 'value': user_penalty[user[0]] })
         for problem in problems:
-            attempts = subs.filter(problem_id = problem['pk']).filter(user_id = user[0])
+            attempts = subs.filter(problem = problem['pk']).filter(id = user[0])
             if problem['pk'] in user_solvedprobs[user[0]]:
                 rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
             else:
                 rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
         rows.append(rowItem)
+
+    if len(rows) == 1:
+        raise KeyError
+
 
     vars['rows'] = rows
 
