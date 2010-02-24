@@ -17,7 +17,9 @@
 {% endblock %}
 
 {% block main_content %}
+
 {% ifequal section "view" %}
+{% autoescape off %}
 {% if problem_statement %}
 {{ problem_statement }}
 <div class ="constraints"> <h4> Constraints: </h4> {{ problem_notes }}</div>
@@ -29,6 +31,7 @@
     <h4> Time Limit: {{ tlimit }} sec <br>
       Memory Limit: {{ mlimit }} MB</h4> 
 </div>
+{% endautoescape %}
 {% endif %}
 {% endifequal %}
 

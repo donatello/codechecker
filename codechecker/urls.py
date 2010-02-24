@@ -22,10 +22,13 @@ urlpatterns = patterns('',
     (r'^register/$', 'codechecker.generic_views.register'),
     (r'^activate/(?P<code>\d+)/$', 'codechecker.generic_views.activate'),
     (r'^change_password_first_time/$', 'codechecker.generic_views.change_password'),
+
     # User Related Views
     (r'^login/$', 'django.contrib.auth.views.login', { 'template_name' : 'accounts/login.html', }),
     (r'^logout/$', 'django.contrib.auth.views.logout', { 'next_page' : '/site/', }), 
-
+    (r'^change_password/$', 'django.contrib.auth.views.password_change', { 'template_name' : 'accounts/password_change_form.html' }),
+    (r'^password_changed/$', 'django.contrib.auth.views.password_change_done', {'template_name': 'accounts/password_change_done.html'}),
+    
     #Contest Related Views
     (r'^contests/', include('codechecker.contests.contest_urls')),
 

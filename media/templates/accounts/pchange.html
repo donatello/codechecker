@@ -2,9 +2,10 @@
 
 {% block main_content %}
 {% if message %}
-  {{ message }}
+  {{ message }} 
 {% endif %}
 {% if form %}
+Hi {{ team }} Team, Please create your login password Here ! 
 <form method="post" action="/site/change_password_first_time/">
 <table>
 {{ form.as_table }}

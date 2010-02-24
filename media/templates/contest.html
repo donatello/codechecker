@@ -4,6 +4,7 @@
 <h3> Contest : {{ title }} </h3>
 {% endblock %}
 {% block links %}
+
 <div id="links">
     <a href = "/site/contests/{{ contest }}/description/" id="description">Description</a>
     <a href = "/site/contests/{{ contest }}/problems" id="problems">Problems</a>
@@ -18,12 +19,13 @@
 {% endblock %}
 
 {% block main_content %}
+{% autoescape off %}
 {% ifequal section "description" %}
 {{ description }}
 {% endifequal %}
 {% ifnotequal section "description" %}
 {{ block.super }}
 {% endifnotequal %}
-
+{% endautoescape %}
 {% endblock %}
 
