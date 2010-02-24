@@ -272,7 +272,7 @@ def problem_view_handle(request, problem_id, action='view'):
     current_time = datetime.datetime.now() + offset
 
     # If the person is not admin and if the contest has not begun, dont show the problem
-    if current_time < contest.startDateTime:       
+    if (not request.user.is_superuser) and current_time < contest.startDateTime:       
         vars['errors'] = CONTEST_NOT_BEGUN
         vars['problem_code'] = problem.problemCode
         vars['section'] = action
