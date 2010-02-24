@@ -81,111 +81,6 @@ def show_all_problems(request, contest = -1):
     template = loader.get_template('table.html')
     return HttpResponse(template.render(context))
 
-def ranklist_cmp(userA, userB):
-    if userA[1] != userB[1]:
-        return userB[1] - userA[1]
-    return userA[2] - userB[2]
-
-"""
-Ranklist Algorithm:
-
-We consider only submissions during a contest for problems in that
-contest for the ranklist. The SCORE for each user is the sum of scores
-for all problems. The score for a problem is full points if it is ACC
-and 0 otherwise. The PENALTY for a user is the sum of the penalties
-for each problem.  The penalty for a problem is 0 if the problem has
-not been solved. If the problem is solved, the penalty is the number
-minutes since the start of the contest when the first ACC solution
-submitted, with an additional 20 minutes penalty for each unsuccessful
-submission for that problem.
-
-The ranklist is simply got by sorting the users with SCORE descending
-and PENALTY ascending.
-
-TODO: There is currently a small bug in the ranklist implementation
-below. If a user resubmits a problem that is already solved during the
-contest, it will add points in the ranklist. This bug has to be fixed!
-"""    
-def show_ranklist(request, contest):
-    vars = { }
-    vars['category'] = 'Ranklist'
-
-    problems =  Problem.objects.filter(contest=contest).values( 'pk', 'problemCode', 'maxScore' )
-
-    # form the column headers of the ranklist
-    vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
-    for problem in problems:
-        vars['columns'].append( { 'name' : problem['problemCode']
-                                  #, 'link' : '/site/problems/' + str(problem['pk']) +'/' 
-                                  })
-
-    # first get all submissions that correspond to this contest and
-    # are submitted during the duration of this contest
-    subs = Submission.objects.filter(submissionTime__gte=contest.startDateTime
-                                     ).filter(submissionTime__lte=contest.endDateTime
-                                              ).filter(problem__contest__exact = contest.id)
-
-    # form (user -> solved problems), (user -> total scores) and (user ->
-    # penalty) mappings.
-    user_solvedprobs = {}    
-    user_scores = {}
-    user_penalty = {}
-    for sub in subs:
-        # insert user into score mapping with 0 points first.
-        if not(sub.user_id in user_scores):
-            user_scores[sub.user_id] = 0
-        # insert user into penalty mapping with 0 penalty first.
-        if not(sub.user_id in user_penalty):
-            user_penalty[sub.user_id] = 0
-        # insert user into solvedprobs mapping with empty set first.
-        if not(sub.user_id in user_solvedprobs):
-            user_solvedprobs[sub.user_id] = set([])
-        
-        # add submission points
-        user_scores[sub.user_id] += sub.submissionPoints
-        # add solved problem into solvedprobs mapping.
-        if sub.result == 'ACC':
-            user_solvedprobs[sub.user_id].add(sub.problem_id)
-
-    # now accumulate penalties for solved problems only.
-    for sub in subs:
-        if sub.problem_id in user_solvedprobs[sub.user_id]:
-            user_penalty[sub.user_id] += sub.submissionPenalty
-
-    # now sort the users according to the ranking ordering -> sort by
-    # scores descending, and break ties by penalties ascending.
-    distinct_users = user_scores.keys()
-    user_tuples = []
-    for user in distinct_users:
-        u = int(user)
-        score, penalty = int(user_scores[u]),int(user_penalty[u])
-        user_tuples.append([u, score, penalty])
-        
-    sorted_users = sorted(user_tuples, ranklist_cmp)
-
-    # now form the remaining rows of the ranklist
-    rows = []
-    for user in sorted_users:
-        rowItem = []
-        rowItem.append( { 'value': User.objects.get(id = user[0]).username})
-        rowItem.append( { 'value': user_scores[user[0]] })
-        rowItem.append( { 'value': user_penalty[user[0]] })
-        for problem in problems:
-            attempts = subs.filter(problem = problem['pk']).filter(user = user[0])
-            if problem['pk'] in user_solvedprobs[user[0]]:
-                rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
-            elif len(attempts) != 0:
-                rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
-            else:
-                rowItem.append( { 'value': '--'})
-        rows.append({'items': rowItem})
-
-    vars['rows'] = rows
-
-    return vars    
-
-# This is my Ranklist generator and ranlistComparator, Didn't want to disturb aditya's logic, so branched out  
-# THIS IS COMPLETLY UNTESTED CODE  
 
 def rankingComparision( userA, userB ):
     total_A = userA[2]
@@ -236,8 +131,8 @@ def generate_ranklist(contest_id=-1):
                     for sub in problem_submissions:
                         totalPenalty = totalPenalty + sub.submissionPenalty
 
-                    user_points.append({'problem' : problem , 'points' : submission.submissionPoints, 'penalty' : totalPenalty})
-                    points = points + submission.submissionPoints
+                    user_points.append({'problem' : problem , 'points' : first_accepted.submissionPoints, 'penalty' : totalPenalty})
+                    points = points + first_accepted.submissionPoints
                     penalty = penalty + totalPenalty
                 except :
                     # no correct submissions, so do nothing, continue
@@ -302,7 +197,7 @@ def contest_view_handle(request, contest_id, action='description', page=1):
             vars['errors'] = CONTEST_NOT_BEGUN
    
     elif action == 'ranklist':
-        ranklist_vars =  show_ranklist(request, contest)
+        ranklist_vars =  generate_ranklist(request, contest)
         vars.update(ranklist_vars)
         
     elif action == 'submissions':
