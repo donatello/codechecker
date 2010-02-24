@@ -337,7 +337,8 @@ def problem_submit(request, problem_id) :
     template = loader.get_template('problem.html')
     return HttpResponse(template.render(context))
 
-def submissions_view_handle(request, contest_id = None, problem_id = None, user_context = None, page = 1, non_page=None ):
+def submissions_view_handle(request, contest_id = None, problem_id = None, user_context = None, 
+                            page = 1, non_page=None ):
     vars = {}
     vars['category'] = 'Submissions'
     vars['colored'] = True 
@@ -361,6 +362,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
         submissions_page = paginator.page(paginator.num_pages)
     
     submissions = submissions_page.object_list
+    vars['paginator'] = submissions_page
     vars['columns'] = [ {'name' : 'ID'}, {'name': 'Problem'}, {'name': 'User'}, {'name': 'Result'}, {'name': 'Language'}, ] 
     vars['colored'] = True 
     rows = []
@@ -382,7 +384,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
         rows.append({'items' : rowItem, 'color':color})
     
     vars['rows'] = rows
-    if non_page :
+    if non_page:
         return vars
     context = Context(request, vars)
     template = loader.get_template('table.html')
