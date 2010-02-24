@@ -30,8 +30,11 @@
                 <!-- end navigation -->
                 {% if user.is_authenticated %}
                 <li> <a href="/site/logout/"> Logout </a> </li>
+                {% else %}
+                <li> <a href="/site/login/"> Login </a> </li>
+                <li> <a href="/site/register/"> Register </a> </li>                
                 {% endif %}
-
+                
             {% endblock %}
             
         </ul>    
