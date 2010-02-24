@@ -7,8 +7,9 @@ from django.contrib.auth import authenticate, login
 import time, datetime
 
 from codechecker.contests.models import *
-
-CONTEST_NOT_BEGUN = "Contest Has not Begun Yet, Please revisit after the contest starting time"
+from codechecker.generic_views import debug
+CONTEST_NOT_BEGUN = "The contest has not begun yet. Please revisit once the contest has started."
+offset = datetime.timedelta(hours=5, minutes=30)
 
 def format_time(t):
     ti = time.strptime(str(t),'%Y-%m-%d %H:%M:%S')
@@ -113,8 +114,9 @@ def show_ranklist(request, contest):
     # form the column headers of the ranklist
     vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
     for problem in problems:
-        vars['columns'].append( { 'name' : problem['problemCode'], 
-                                  'link' : '/site/problems/' + str(problem['pk']) +'/' })
+        vars['columns'].append( { 'name' : problem['problemCode']
+                                  #, 'link' : '/site/problems/' + str(problem['pk']) +'/' 
+                                  })
 
     # first get all submissions that correspond to this contest and
     # are submitted during the duration of this contest
@@ -234,7 +236,7 @@ def contest_view_handle(request, contest_id, action='description'):
     contest = Contest.objects.get(pk=contest_id)
     
      #Get the Current Time 
-    current_time = datetime.datetime.now()
+    current_time = datetime.datetime.now() + offset
     
     vars['title'] = contest.title
     vars['contest'] = contest.pk
@@ -249,8 +251,7 @@ def contest_view_handle(request, contest_id, action='description'):
     
         # If the person is not admin and if the contest has not begun,
         # dont show the problem
-        if not request.user.is_superuser and current_time < contest.startDateTime :
-            raise KeyError
+        if (not request.user.is_superuser) and current_time < contest.startDateTime:            
             vars['errors'] = CONTEST_NOT_BEGUN
    
     else :    
@@ -268,11 +269,10 @@ def problem_view_handle(request, problem_id, action='view'):
     problem = Problem.objects.get(pk=problem_id)
     contest = problem.contest
     
-    #Get the Current Time    
-    current_time = datetime.datetime.now()
+    current_time = datetime.datetime.now() + offset
 
     # If the person is not admin and if the contest has not begun, dont show the problem
-    if (not request.user.is_superuser) and current_time < contest.startDateTime :       
+    if current_time < contest.startDateTime:       
         vars['errors'] = CONTEST_NOT_BEGUN
         vars['problem_code'] = problem.problemCode
         vars['section'] = action
@@ -301,13 +301,13 @@ def problem_submit(request, problem_id) :
     contest = problem.contest
     
     #Get the Current Time    
-    current_time = datetime.datetime.now()
+    current_time = datetime.datetime.now() + offset
     
     vars['problem'] = problem.pk
     vars['problem_code'] = problem.problemCode
     vars['section'] = 'submit'
     
-    if not request.user.is_superuser or current_time < contest.startDateTime :
+    if (not request.user.is_superuser) and current_time < contest.startDateTime :
         vars['errors'] = CONTEST_NOT_BEGUN
     else :
         if request.method == 'POST' :
