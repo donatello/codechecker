@@ -8,6 +8,7 @@ import time, datetime
 
 from codechecker.contests.models import *
 from codechecker.generic_views import debug
+    
 CONTEST_NOT_BEGUN = "The contest has not begun yet. Please revisit once the contest has started."
 offset = datetime.timedelta(hours=5, minutes=30)
 
@@ -353,9 +354,8 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
         submissions_page = paginator.page(page)
     except (EmptyPage, InvalidPage):
         submissions_page = paginator.page(paginator.num_pages)
-
+    
     submissions = submissions_page.object_list
-    debug(submissions)
     vars['columns'] = [ {'name' : 'ID'}, {'name': 'Problem'}, {'name': 'User'}, {'name': 'Result'}, {'name': 'Language'}, ] 
     vars['colored'] = True 
     rows = []
