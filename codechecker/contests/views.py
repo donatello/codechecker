@@ -255,10 +255,19 @@ def contest_view_handle(request, contest_id, action='description', page=1):
         if (not request.user.is_superuser) and current_time < contest.startDateTime:            
             vars['errors'] = CONTEST_NOT_BEGUN
    
-    else :    
-        if action == 'ranklist':
-            ranklist_vars =  show_ranklist(request, contest)
-            vars.update(ranklist_vars)
+    elif action == 'ranklist':
+        ranklist_vars =  show_ranklist(request, contest)
+        vars.update(ranklist_vars)
+        
+    elif action == 'submissions':
+        submissions_vars = submissions_view_handle(request, contest_id = contest.pk, non_page = True)
+        vars.update(submissions_vars)
+        
+    elif action == "my_submissions":
+        mysub_vars = submissions_view_handle(request, contest_id = contest.pk, 
+                                             user_context = True, non_page = True)
+        vars.update(mysub_vars)
+
 
     context = Context(request, vars)
     template = loader.get_template('contest.html')
@@ -333,11 +342,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
     vars['category'] = 'Submissions'
     vars['colored'] = True 
     if contest_id != None :
-        all_submissions = []
-        problems = Problem.objects.filter(contest=contest_id)
-        for problem in problems :            
-            l = Submission.objects.order_by('-pk').filter(problem=problem.pk)
-            all_submissions.extend(l)
+        all_submissions = Submission.objects.order_by('-pk').filter(problem__contest = contest_id)
     elif problem_id != None :
         all_submissions = Submission.objects.order_by('-pk').filter(problem=problem_id)
     else :
