@@ -184,51 +184,97 @@ def show_ranklist(request, contest):
 
     return vars    
 
-# This is my Ranklist view, Didn't want to disturb aditya's logic, so branched out  
+# This is my Ranklist generator and ranlistComparator, Didn't want to disturb aditya's logic, so branched out  
 # THIS IS COMPLETLY UNTESTED CODE  
-def generate_rank_list(request, contest_id):
-    # Get All the problems for this contest 
-    problems = Problems.objects.filter(contest=contest_id).order_by('problem_code')
+
+def rankingComparision( userA, userB ):
+    total_A = userA[2]
+    total_B = userB[2]
     
-    # Get all the submissions for this contest
-    submissions = Submission.objects.filter(submissionTime__gte=contest.startDateTime
+    if total_A['points'] != total_B['points'] :
+        return int(total_B['points'] - total_A['points'])  
+    return int(total_A['penalty'] - total_B['penalty'])
+    
+def generate_ranklist(contest_id=-1):
+    vars = {}
+
+    # Get the contest instance
+    contest = Contest.objects.get(pk=contest_id)
+    
+    # Get All the problems for this contest 
+    problems = Problem.objects.filter(contest=contest_id).order_by('problemCode')
+    
+    #header for the ranklist
+    vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
+    for problem in problems:
+        vars['columns'].append( { 'name' : problem.problemCode  })
+
+
+    try :
+        # Get all the submissions for this contest
+        submissions = Submission.objects.filter(submissionTime__gte=contest.startDateTime
                                      ).filter(submissionTime__lte=contest.endDateTime
                                               ).filter(problem__contest = contest.id)
-                                              
-    # Get All the Users Participated in this Contest 
-    #This is why I love Python List Comprehensions
-    users = Set([ submission.user for submission in submissions])
+        users = set([ submission.user for submission in submissions])
+        users_list = [ ]
+        for user in users :
+            # get all the submission for this user
+            user_submissions = submissions.filter(user=user.id)
+            user_points = []
+            points = 0
+            penalty = 0
+            for problem in problems :
+                # get all the user submissions for this problem
+                problem_submissions = user_submissions.filter(problem=problem.pk)   
+                 
+                try :
+                    # get the first accepted submission
+                    first_accepted = problem_submissions.filter(result='ACC').order_by('submissionTime')[0]
+                    
+                    totalPenalty = 0
+                    penalizable = problem_submissions.filter(submissionTime__lte=first_accepted.submissionTime)
+                    for sub in problem_submissions:
+                        totalPenalty = totalPenalty + sub.submissionPenalty
+
+                    user_points.append({'problem' : problem , 'points' : submission.submissionPoints, 'penalty' : totalPenalty})
+                    points = points + submission.submissionPoints
+                    penalty = penalty + totalPenalty
+                except :
+                    # no correct submissions, so do nothing, continue
+                    continue
+                
+                #summation of the points and penalty for this user
+                users_list.append([user, user_points, {'points' : points, 'penalty': penalty}])                
+
+        users_list = sorted(users_list, rankingComparision)
+        
+        # now form the remaining rows of the ranklist
+        rows = []
+        for item in users_list:
+            rowItem = []
+
+            rowItem.append( { 'value': item[0].username})
+            rowItem.append( { 'value': item[2]['points'] })
+            rowItem.append( { 'value': item[2]['penalty']})
+             
+            for problem in problems:
+                attempts = submissions.filter(problem = problem.pk).filter(user = item[0])
+                user_problems = set([ sub["problem"] for sub in item[1] ])
+                
+                if problem in user_problems:
+                    rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
+                elif len(attempts) != 0:
+                    rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
+                else:
+                    rowItem.append( { 'value': '--'})
+            
+            rows.append({'items': rowItem})
+            
+        vars['rows'] = rows      
+    except:
+        pass
     
-    users_list = [ ]
-    for user in users :
-        user_submissions = submissions.filter(user=user.id)
-        user_points = []
-        for problem in problems :
-              problem_submissions = user_submissions.filter(problem=problem.pk)
-              first_accepted = problem_submissions.filter(result='ACC').order_by('submissionTime')[0]
-              if first_accepted :
-                penalizable = problem_submissions.filter(submissionTime_lte=first_accepted.submissionTime)
-              else :
-                penalizable = problem_submissions
-              
-              #calculate the points and penalty here
-              points = 0
-              penalty = 0
-              
-              #append the points,penalty tuple to user points
-              user_points.append((points, penalty))
-              
-        #append the sum of points and penalty tuple
-        user_points.append( (sum(x),sum(y)) for (x,y) in user_points )
-        users_list.append(user_points)
-    
-    # sort the ranking list that has just been obtained
-    sort(users_list, rankingCmp)
-    
-    #Generate rows and colums now 
-    
-    #return Context now 
-     
+    return vars  
      
 def contest_view_handle(request, contest_id, action='description', page=1):
     vars = {}
@@ -267,6 +313,7 @@ def contest_view_handle(request, contest_id, action='description', page=1):
         mysub_vars = submissions_view_handle(request, contest_id = contest.pk, 
                                              user_context = True, non_page = True)
         vars.update(mysub_vars)
+            
 
 
     context = Context(request, vars)
