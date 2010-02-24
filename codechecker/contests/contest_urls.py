@@ -5,4 +5,5 @@ urlpatterns = patterns('codechecker.contests.views',
         (r'^all/', 'show_all_contests'),
         (r'^(?P<contest_id>\d+)/$', 'contest_view_handle'),
         (r'^(?P<contest_id>\d+)/(?P<action>\w+)/$', 'contest_view_handle'),
+        (r'^(?P<contest_id>\d+)/(?P<action>\w+)/(?P<page>\d+)/$', 'contest_view_handle'),
         )

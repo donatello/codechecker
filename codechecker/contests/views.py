@@ -230,7 +230,7 @@ def generate_rank_list(request, contest_id):
     #return Context now 
      
      
-def contest_view_handle(request, contest_id, action='description'):
+def contest_view_handle(request, contest_id, action='description', page=1):
     vars = {}
     
     # Get the respective Contest
