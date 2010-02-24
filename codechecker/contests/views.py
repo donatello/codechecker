@@ -122,8 +122,6 @@ def show_ranklist(request, contest):
                                      ).filter(submissionTime__lte=contest.endDateTime
                                               ).filter(problem__contest__exact = contest.id)
 
-    # log("subs count = %d" % len(subs))
-
     # form (user -> solved problems), (user -> total scores) and (user ->
     # penalty) mappings.
     user_solvedprobs = {}    
@@ -217,9 +215,9 @@ def generate_rank_list(request, contest_id):
               #append the points,penalty tuple to user points
               user_points.append((points, penalty))
               
-         #append the sum of points and penalty tuple
-         user_points.append( (sum(x),sum(y)) for (x,y) in user_points )
-         users_list.append(user_points)
+        #append the sum of points and penalty tuple
+        user_points.append( (sum(x),sum(y)) for (x,y) in user_points )
+        users_list.append(user_points)
     
     # sort the ranking list that has just been obtained
     sort(users_list, rankingCmp)
@@ -249,9 +247,9 @@ def contest_view_handle(request, contest_id, action='description'):
         problem_vars =  show_all_problems(request, contest)
         vars.update(problem_vars)
     
-     # If the person is not admin or if the contest has not begun, dont show the problem
-    if not request.user.is_superuser or current_time < contest.startDateTime :
-        vars['errors'] = CONTEST_NOT_BEGUN
+        # If the person is not admin or if the contest has not begun, dont show the problem
+        if not request.user.is_superuser and current_time < contest.startDateTime :
+            vars['errors'] = CONTEST_NOT_BEGUN
    
     else :    
         if action == 'ranklist':
