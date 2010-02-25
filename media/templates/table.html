@@ -11,15 +11,15 @@
 <div class="pagination">
     <span>
         {% if submissions_page.has_previous %}
-            <a href="{{ base_url }}/{{ submissions_page.previous_page_number }}/"><img src="/media/img/site/arrowleft.png"> </a>
+            <a href="{{ base_url }}/{{ current_page.previous_page_number }}/"><img src="/media/img/site/arrowleft.png"> </a>
         {% endif %}
     </span>
         <span>
-            Page {{ submissions_page.number }} of {{ submissions_page.paginator.num_pages }}
+            Page {{ current_page.number }} of {{ current_page.paginator.num_pages }}
         </span>
     <span>
         {% if submissions_page.has_next %}
-            <a href="{{ base_url }}/{{ submissions_page.next_page_number }}/"> <img src="/media/img/site/arrowright.png"></a>
+            <a href="{{ base_url }}/{{ current_page.next_page_number }}/"> <img src="/media/img/site/arrowright.png"></a>
         {% endif %}
     </span>
 </div>

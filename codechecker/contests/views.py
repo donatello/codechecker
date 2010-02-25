@@ -27,7 +27,9 @@ def show_all_contests(request, page=1):
     vars = {}
     vars['category'] = 'Contests'
     contests =  Contest.objects.all().values( 'pk', 'title', 'startDateTime', 'endDateTime')
+    
     pagination = Paginator(contests, 25)
+    
     try :
         paginated_contests = pagination.page(page)
     except (EmptyPage, InvalidPage):
@@ -36,7 +38,8 @@ def show_all_contests(request, page=1):
     vars['columns'] = [ {'name' : 'Contest'} , {'name' : 'Start Time'} , {'name': 'End Time'} ]
 
     contests = paginated_contests.object_list
-
+    vars['current_page'] = paginated_contests
+    
     rows = []
     for contest in contests :
         rowItem = []
@@ -50,7 +53,7 @@ def show_all_contests(request, page=1):
     context = Context(request, vars)
     return HttpResponse(template.render(context))
 
-def show_all_problems(request, contest = -1):
+def show_all_problems(request, contest = -1, page=1):
     vars = { }
     vars['category'] = 'Problems'
     vars['columns'] = [{'name' : 'Problem'} , {'name' : 'Maximum Points'}]
@@ -61,6 +64,14 @@ def show_all_problems(request, contest = -1):
     else :
         problems =  Problem.objects.filter(contest=contest).values( 'pk', 'problemCode', 'maxScore' )
 
+    pagination = Paginator(problems, 25)
+    try :
+        paginated_problems = pagination.page(page)
+    except (EmptyPage, InvalidPage):
+        paginated_problems = pagination.page(pagination.num_pages)
+    
+    problems = paginated_problems.object_list
+    vars['current_page'] = paginated_problems
     rows = []
     for problem in problems :
         rowItem = []
@@ -303,6 +314,8 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
             return HttpResponseRedirect('/site/login/?next=' + request.path)
         all_submissions = all_submissions.filter(user=request.user)
 
+    debug(all_submissions)
+
     paginator = Paginator(all_submissions, 15) 
     
     try :
@@ -312,7 +325,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
     
     submissions = submissions_page.object_list
 
-    vars['submissions_page'] = submissions_page
+    vars['current_page'] = submissions_page
 
     vars['columns'] = [ {'name' : 'ID'}, {'name': 'Problem'}, {'name': 'User'}, {'name': 'Result'}, {'name': 'Language'}, ] 
     vars['colored'] = True 
