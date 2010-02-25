@@ -246,7 +246,7 @@ def problem_submit(request, problem_id) :
     problem = Problem.objects.get(pk=problem_id)
     contest = problem.contest
     
-    #Get the Current Time    
+    #Get the Current Time 
     current_time = datetime.datetime.now() + offset
     
     vars['problem'] = problem.pk
@@ -260,9 +260,10 @@ def problem_submit(request, problem_id) :
             form = SubmissionForm(request.POST)
             if form.is_valid():
                 submission = Submission( problem = problem , 
-                        user = request.user, 
-                        submissionLang = form.cleaned_data['SubmissionLang'], 
-                        submissionCode = form.cleaned_data['SubmissionCode'])
+                                         user = request.user, 
+                                         submissionLang = form.cleaned_data['SubmissionLang'], 
+                                         submissionCode = form.cleaned_data['SubmissionCode'],
+                                         submissionTime = current_time)
                 submission.save()
                 return HttpResponseRedirect('/site/submissions/')
 
