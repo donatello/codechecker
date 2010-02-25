@@ -208,7 +208,7 @@ def contest_view_handle(request, contest_id, action='description', page=1):
     template = loader.get_template('contest.html')
     return HttpResponse(template.render(context))
 
-def problem_view_handle(request, problem_id, action='view'):
+def problem_view_handle(request, problem_id, action='view', page=1):
     vars = { }
     # Get the respective Problem and the contest 
     problem = Problem.objects.get(pk=problem_id)
@@ -233,6 +233,14 @@ def problem_view_handle(request, problem_id, action='view'):
         vars['output_data'] = problem.outputData
         vars['tlimit'] = problem.tlimit
         vars['mlimit'] = problem.mlimit
+        
+        elif action == 'submissions':
+            submissions_vars = submissions_view_handle(request, problem_id = problem.pk, non_page = True, page=page)
+            vars.update(submissions_vars)
+        
+        elif action == "my_submissions":
+            mysub_vars = submissions_view_handle(request, problem_id = problem.pk, user_context = True, non_page = True, page=page)
+            vars.update(mysub_vars)
 
     context = Context(request, vars)
     template = loader.get_template('problem.html')
@@ -277,7 +285,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
     vars = {}
     vars['category'] = 'Submissions'
     vars['colored'] = True 
-    base_url = '/site/'; 
+    base_url = '/site/'
     if contest_id != None :
         base_url = base_url + 'contests/' + str(contest_id) + '/'
         all_submissions = Submission.objects.order_by('-pk').filter(problem__contest = contest_id)
