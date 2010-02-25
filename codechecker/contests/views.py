@@ -349,6 +349,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
         
     if non_page:
         return vars
+    
     context = Context(request, vars)
     template = loader.get_template('table.html')
     return HttpResponse(template.render(context))
