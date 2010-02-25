@@ -83,21 +83,19 @@ def show_all_problems(request, contest = -1):
 
 
 def rankingComparision( userA, userB ):
-    total_A = userA[2]
-    total_B = userB[2]
+    if userA[1] != userB[1]:
+        return userB[1] - userA[1]
+
+    return userA[2] - userB[2]
     
-    if total_A['points'] != total_B['points'] :
-        return int(total_B['points'] - total_A['points'])  
-    return int(total_A['penalty'] - total_B['penalty'])
-    
-def generate_ranklist(contest_id=-1):
+def generate_ranklist(request, contest):
     vars = {}
 
     # Get the contest instance
-    contest = Contest.objects.get(pk=contest_id)
+    contest = Contest.objects.get(pk=contest.id)
     
     # Get All the problems for this contest 
-    problems = Problem.objects.filter(contest=contest_id).order_by('problemCode')
+    problems = Problem.objects.filter(contest=contest.id).order_by('problemCode')
     
     #header for the ranklist
     vars['columns'] = [{'name' : 'Team'}, {'name' : 'Total Score'}, {'name' : 'Penalty'}]
@@ -105,69 +103,65 @@ def generate_ranklist(contest_id=-1):
         vars['columns'].append( { 'name' : problem.problemCode  })
 
 
-    try :
-        # Get all the submissions for this contest
-        submissions = Submission.objects.filter(submissionTime__gte=contest.startDateTime
-                                     ).filter(submissionTime__lte=contest.endDateTime
-                                              ).filter(problem__contest = contest.id)
-        users = set([ submission.user for submission in submissions])
-        users_list = [ ]
-        for user in users :
-            # get all the submission for this user
-            user_submissions = submissions.filter(user=user.id)
-            user_points = []
-            points = 0
-            penalty = 0
-            for problem in problems :
-                # get all the user submissions for this problem
-                problem_submissions = user_submissions.filter(problem=problem.pk)   
-                 
-                try :
-                    # get the first accepted submission
-                    first_accepted = problem_submissions.filter(result='ACC').order_by('submissionTime')[0]
-                    
-                    totalPenalty = 0
-                    penalizable = problem_submissions.filter(submissionTime__lte=first_accepted.submissionTime)
-                    for sub in problem_submissions:
-                        totalPenalty = totalPenalty + sub.submissionPenalty
+    # Get all the submissions for this contest
+    submissions = Submission.objects.filter(submissionTime__gte=contest.startDateTime
+                                 ).filter(submissionTime__lte=contest.endDateTime
+                                          ).filter(problem__contest = contest.id)
+    users = set([ submission.user for submission in submissions])
+    users_list = [ ]
+    for user in users :
+        # get all the submission for this user
+        user_submissions = submissions.filter(user=user.id)
+        points = 0
+        penalty = 0
+        for problem in problems :
+            # get all the user submissions for this problem
+            problem_submissions = user_submissions.filter(problem=problem.pk)   
 
-                    user_points.append({'problem' : problem , 'points' : first_accepted.submissionPoints, 'penalty' : totalPenalty})
-                    points = points + first_accepted.submissionPoints
-                    penalty = penalty + totalPenalty
-                except :
-                    # no correct submissions, so do nothing, continue
-                    continue
-                
-                #summation of the points and penalty for this user
-                users_list.append([user, user_points, {'points' : points, 'penalty': penalty}])                
+            try :
+                # get the first accepted submission
+                first_accepted = problem_submissions.filter(result='ACC'
+                                                            ).order_by('submissionTime')[0]
 
-        users_list = sorted(users_list, rankingComparision)
-        
-        # now form the remaining rows of the ranklist
-        rows = []
-        for item in users_list:
-            rowItem = []
+            except:
+                first_accepted = None
 
-            rowItem.append( { 'value': item[0].username})
-            rowItem.append( { 'value': item[2]['points'] })
-            rowItem.append( { 'value': item[2]['penalty']})
-             
-            for problem in problems:
-                attempts = submissions.filter(problem = problem.pk).filter(user = item[0])
-                user_problems = set([ sub["problem"] for sub in item[1] ])
-                
-                if problem in user_problems:
-                    rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
-                elif len(attempts) != 0:
-                    rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
-                else:
-                    rowItem.append( { 'value': '--'})
-            
-            rows.append({'items': rowItem})
-            
-        vars['rows'] = rows      
-    except:
-        pass
+            if first_accepted != None:
+                penalizable = problem_submissions.filter(submissionTime__lte = 
+                                                         first_accepted.submissionTime)
+                for sub in penalizable:
+                    penalty += sub.submissionPenalty
+
+                points += first_accepted.submissionPoints
+
+        user_tuple = [user, int(points), int(penalty)]            
+        users_list.append(user_tuple) 
+
+    users_list = sorted(users_list, rankingComparision)
+
+    # now form the remaining rows of the ranklist
+    rows = []
+    for item in users_list:
+        rowItem = []
+
+        rowItem.append( { 'value': item[0].username})
+        rowItem.append( { 'value': item[1] })
+        rowItem.append( { 'value': item[2] })
+
+        for problem in problems:
+            attempts = submissions.filter(problem = problem.pk).filter(user = item[0])
+            solved = attempts.filter(result = 'ACC')
+
+            if len(solved) > 0:
+                rowItem.append( { 'value': 'ACC (' + str(len(attempts)) + ')'})
+            elif len(attempts) != 0:
+                rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
+            else:
+                rowItem.append( { 'value': '--'})
+
+        rows.append({'items': rowItem})
+
+    vars['rows'] = rows      
     
     return vars  
      
@@ -304,7 +298,7 @@ def submissions_view_handle(request, contest_id = None, problem_id = None, user_
         submissions_page = paginator.page(paginator.num_pages)
     
     submissions = submissions_page.object_list
-    vars['paginator'] = submissions_page
+    vars['submissions_page'] = submissions_page
     vars['columns'] = [ {'name' : 'ID'}, {'name': 'Problem'}, {'name': 'User'}, {'name': 'Result'}, {'name': 'Language'}, ] 
     vars['colored'] = True 
     rows = []
