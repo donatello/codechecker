@@ -51,8 +51,8 @@ body{
     color:#666666;
 }
 
-#navlist li a:link { color: #999999; text-decoration:none; }
-#navlist li a:visited { color: #999999; text-decoration:none; }
+#navlist li a:link { color:  #275A78; text-decoration:none; }
+#navlist li a:visited { color: #275A78; text-decoration:none; }
 #navlist li a:hover {color: #666666; text-decoration:none; }
 
 h1{
@@ -150,7 +150,7 @@ h4{
    /* border-collapse:collapse; */
     font-size:12px;
     text-align:center;
-    width: 70%;
+    width: 85%;
     border: #555555;
 }
 
@@ -206,7 +206,7 @@ h4{
 }
 
 #links .selected{
-    color: #555555;
+    color:#555555;
     background: #CCCCCC;
 }
 

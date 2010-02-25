@@ -161,8 +161,8 @@ def generate_ranklist(contest_id=-1):
         for item in users_list:
             rowItem = []
 
-            rowItem.append( { 'value': item[0].username})
-            rowItem.append( { 'value': '<font style="font-size: 1.25em;"><b>' + str(item[2]['points']) + '</b></font>' }) 
+            rowItem.append( { 'value': '<font style="font-size: 1.15em;">' + item[0].username + '</font>'})
+            rowItem.append( { 'value': '<font style="font-size: 1.1em;"><b>' + str(item[2]['points']) + '</b></font>' }) 
             rowItem.append( { 'value': item[2]['penalty']})
              
             for problem in problems:
@@ -171,7 +171,7 @@ def generate_ranklist(contest_id=-1):
                 
                 if problem in user_problems:
                     
-                    rowItem.append( { 'value': '<font style="font-size: 1.25em;"><b>' + str(problem.maxScore) + '</b> </font>(' + str(len(attempts)) + ')'})
+                    rowItem.append( { 'value': '<font style="font-size: 1.1em;"><b>' + str(problem.maxScore) + '</b> </font>(' + str(len(attempts)) + ')'})
                 elif len(attempts) != 0:
                     rowItem.append( { 'value': '(-' + str(len(attempts)) + ')'})
                 else:
@@ -217,6 +217,8 @@ def contest_view_handle(request, contest_id, action='description', page=1):
         vars.update(submissions_vars)
         
     elif action == "my_submissions":
+        if not request.user.is_authenticated() :
+            return HttpResponseRedirect('/site/login/?next=' + request.path)
         mysub_vars = submissions_view_handle(request, contest_id = contest.pk, user_context = True, non_page = True, page=page)
         vars.update(mysub_vars)
             
@@ -253,11 +255,13 @@ def problem_view_handle(request, problem_id, action='view', page=1):
         
         if action == 'submissions':
             submissions_vars = submissions_view_handle(request, problem_id = problem.pk, non_page = True, page=page)
-            debug(submissions_vars)
             vars.update(submissions_vars)
         
         elif action == "my_submissions":
+            if not request.user.is_authenticated() :
+                return HttpResponseRedirect('/site/login/?next=' + request.path)
             mysub_vars = submissions_view_handle(request, problem_id = problem.pk, user_context = True, non_page = True, page=page)
+            debug(mysub_vars)
             vars.update(mysub_vars)
 
     context = Context(request, vars)
