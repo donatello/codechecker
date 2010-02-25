@@ -234,7 +234,7 @@ def problem_view_handle(request, problem_id, action='view', page=1):
         vars['tlimit'] = problem.tlimit
         vars['mlimit'] = problem.mlimit
         
-        elif action == 'submissions':
+        if action == 'submissions':
             submissions_vars = submissions_view_handle(request, problem_id = problem.pk, non_page = True, page=page)
             vars.update(submissions_vars)
         
