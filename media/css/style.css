@@ -147,10 +147,11 @@ h4{
 
 /* Data Table Content*/
 .zebra{
-    border-collapse:collapse;
+   /* border-collapse:collapse; */
     font-size:12px;
     text-align:center;
     width: 70%;
+    border: #555555;
 }
 
 .zebra th{
@@ -207,4 +208,21 @@ h4{
 #links .selected{
     color: #555555;
     background: #CCCCCC;
+}
+
+
+/* Pagination */
+.pagination{
+    height: 50px;
+    padding: 10px;
+
+}
+.pagination span{
+    padding: 0px 20px 0px 20px;
+    font-size: 1.5em;
+    vertical-align: text-top;
+}
+
+img{
+    border: 0;
 }
