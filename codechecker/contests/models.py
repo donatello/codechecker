@@ -109,7 +109,7 @@ class Submission(models.Model):
                  str(str(file_root) + '.' + self._get_filename_extension()))
 
         elif self.get_submissionLang_display() == 'C':
-            s = ('gcc -O2 -Wall -o ' + str(file_root)  + '.exe ' + 
+            s = ('gcc -O2 -Wall -lm -o ' + str(file_root)  + '.exe ' + 
                  str(str(file_root) + '.' + self._get_filename_extension()))
 
         elif self.get_submissionLang_display() == 'JAVA':
