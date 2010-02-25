@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'table.html' %}
 
 {% block header %}
 <h3> Problem : {{ problem_code }} </h3>
@@ -48,6 +48,12 @@
     </center>
 </form>
 {% endif %}
+{% endifequal %}
+{% ifequal section "submissions" %}
+{{ block.super }}
+{% endifequal %}
+{% ifequal section "my_submissions" %}
+{{ block.super }}
 {% endifequal %}
 {% endblock %}
 
