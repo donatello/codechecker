@@ -5,9 +5,8 @@
 {% endblock %}
 
 {% block main_content %}
-
-
 <center>
+{% if current_page %}
 <div class="pagination">
     <span>
         {% if current_page.has_previous %}
@@ -23,6 +22,8 @@
         {% endif %}
     </span>
 </div>
+{% endif %}
+{% autoescape off %}
 <table id="{{category}}" class="zebra"> 
     <thead><tr>
         {% for col in columns %}
@@ -55,6 +56,7 @@
     {% empty %} 
     {% endfor %}
 </table>
+{% endautoescape %}
 </center>
 {% endblock %}
 
