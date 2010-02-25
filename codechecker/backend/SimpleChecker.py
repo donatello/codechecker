@@ -66,7 +66,7 @@ def run(submission, testcase):
         submission = Submission.objects.get(id = submission.id)
 
         if submission.result == 'RUN' :
-            check = subprocess.Popen('diff -B ' + outfile + ' ' + chkfile, shell=True, 
+            check = subprocess.Popen('diff -Bb ' + outfile + ' ' + chkfile, shell=True, 
                                      stdout=subprocess.PIPE)
             diff_op = check.communicate()[0]
             if diff_op == '' :
