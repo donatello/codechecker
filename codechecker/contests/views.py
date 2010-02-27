@@ -139,14 +139,14 @@ def generate_ranklist(contest_id=-1):
                     # get the first accepted submission
                     first_accepted = problem_submissions.filter(result='ACC').order_by('submissionTime')[0]
                     
-                    totalPenalty = 0
+                    problemPenalty = 0
                     penalizable = problem_submissions.filter(submissionTime__lte=first_accepted.submissionTime)
-                    for sub in problem_submissions:
-                        totalPenalty = totalPenalty + sub.submissionPenalty
+                    for sub in penalizable:
+                        problemPenalty += sub.submissionPenalty
 
-                    user_points.append({'problem' : problem , 'points' : first_accepted.submissionPoints, 'penalty' : totalPenalty})
-                    points = points + first_accepted.submissionPoints
-                    penalty = penalty + totalPenalty
+                    user_points.append({'problem' : problem , 'points' : first_accepted.submissionPoints, 'penalty' : problemPenalty})
+                    points += first_accepted.submissionPoints
+                    penalty += problemPenalty
                 except :
                     # no correct submissions, so do nothing, continue
                     continue
