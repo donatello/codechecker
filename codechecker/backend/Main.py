@@ -9,9 +9,13 @@ sys.path.append("/opt/checker")
 from codechecker.contests.models import Submission,Problem
 #from utils.Logger import Logger as log
 from Handler import *
+from Config import Config
 
 
 def main():
+
+    config = Config()
+    submissionHandler = SubmissionHandler(config)
     
     while 1:
         #submissions is a list of model-instance objects (not dictionary)
@@ -23,7 +27,7 @@ def main():
             continue
         submission = submissions[0]
         log( 'Starting evaluation of  Submission #%s\n' % str(submission.pk))
-        handle_submission(submission)    
+        submissionHandler.handle_submission(submission)    
         log( 'Finishing processing Submission #%s\n' % str(submission.pk))
         time.sleep(2)
     

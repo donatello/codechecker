@@ -29,8 +29,6 @@ RESULT_TYPES = (
     ('WTF', ''),
 )
 
-RUNS_PATH = '/opt/checker/codechecker/backend/submissions/'
-
 class Contest(models.Model):
     title = models.CharField(max_length = 25)
     description = models.TextField()
@@ -100,9 +98,9 @@ class Submission(models.Model):
 
     # The prefix underscore implies that the function is not an
     # exported interface (i think).
-    def _generate_compile_command(self):
+    def _generate_compile_command(self, runpath):
         s = str('')
-        file_root = RUNS_PATH + str(self.pk) 
+        file_root = runpath + str(self.pk) 
 
         if self.get_submissionLang_display() == 'C++':
             s = ('g++ -O2 -Wall -o ' + str(file_root)  + '.exe ' + 
@@ -130,14 +128,14 @@ class Submission(models.Model):
         else:
             return "c"
 
-    def write_code_to_disk(self):
-        f = open(RUNS_PATH + str(self.pk) + '.' + self._get_filename_extension(),'w')
+    def write_code_to_disk(self, runpath):
+        f = open(runpath + str(self.pk) + '.' + self._get_filename_extension(),'w')
         f.write(self.submissionCode)
         f.close()
 
-    def compile(self):
+    def compile(self, runpath):
         import subprocess
-        cmd = self._generate_compile_command()
+        cmd = self._generate_compile_command(runpath)
         self.result = 'CMP'
         self.save()
         compile = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -146,9 +144,9 @@ class Submission(models.Model):
         print "COMPILER STDERR: ", compile_out[1]
         return compile_out[1]
         
-    def check_compile_result(self):
+    def check_compile_result(self, runpath):
         import os
-        if os.path.exists(RUNS_PATH + str(self.pk) + '.exe') == 0:
+        if os.path.exists(runpath + str(self.pk) + '.exe') == 0:
             self.result = 'CMPE'
             self.save()
             return False
