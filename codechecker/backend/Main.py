@@ -26,10 +26,9 @@ def main():
             log('No Submission to handle')
             continue
         submission = submissions[0]
-        log( 'Starting evaluation of  Submission #%s\n' % str(submission.pk))
+        log('Starting evaluation of Submission #%s' % str(submission.pk))
         submissionHandler.handle_submission(submission)    
-        log( 'Finishing processing Submission #%s\n' % str(submission.pk))
-        time.sleep(2)
+        log('Finishing processing Submission #%s\n' % str(submission.pk))
     
     
 if __name__ == '__main__':
