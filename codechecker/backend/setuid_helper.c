@@ -15,7 +15,7 @@ executable which limits NPROC and AS for its child process.
 #include <signal.h>
 #include <string.h>
 
-#define NO_OPTS 3
+#define NO_OPTS 4
 
 pid_t p;
 
@@ -26,13 +26,13 @@ static void alarm_handler(int signo)
 }
 
 struct sigaction alarm_act;
-char *opts[NO_OPTS] = {"debug", "memlimit", "timelimit"};
+char *opts[NO_OPTS] = {"debug", "memlimit", "timelimit", "maxfilesize"};
 
 int main(int argc, char* argv[]) {
-/* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB> <submission-exec>
+/* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB> maxfilesize=MB <submission-exec>
   No error checking done, since this will be run only by the Code checker. */
 
-  int i, debug, memlimit, timelimit;
+  int i, debug, memlimit, timelimit, maxfilesize;
   for(i=1; i< argc; i++) 
   {
     char *name = strtok(argv[i], "="),
@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
     if (!strncmp(name, opts[0], strlen(opts[0]))) debug = value[0] - '0';
     else if (!strncmp(name, opts[1], strlen(opts[1]))) memlimit = atoi(value);
     else if (!strncmp(name, opts[2], strlen(opts[2]))) timelimit = atoi(value);
+    else if (!strncmp(name, opts[3], strlen(opts[3]))) maxfilesize = atoi(value);
   }
 
   // fork argv[1]
@@ -54,6 +55,12 @@ int main(int argc, char* argv[]) {
 
     lim.rlim_cur = lim.rlim_max = memlimit << 20;
     ret = setrlimit(RLIMIT_AS, &lim);
+
+    lim.rlim_cur = timelimit; lim.rlim_max = timelimit + 1;
+    ret = setrlimit(RLIMIT_CPU, &lim);
+
+    lim.rlim_cur = lim.rlim_max = maxfilesize << 20;
+    ret = setrlimit(RLIMIT_FSIZE, &lim);
 
     ret = execvp(argv[argc-1], NULL);    
     //arbitrarily chosen to let parent know that execvp failed; we

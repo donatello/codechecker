@@ -50,17 +50,6 @@ def run(submission, testcase):
     tlimit = prob.tlimit
     mlimit = prob.mlimit
 
-    #set the time limit for the problem execution
-    resource.setrlimit(resource.RLIMIT_CPU,(tlimit,tlimit+1))
-
-    #set the output file date size
-    resource.setrlimit(resource.RLIMIT_FSIZE,(OUTPUT_FILE_SIZE,OUTPUT_FILE_SIZE))
-
-    #set the heap limits
-    # --> no giving extra stack space - leave unmodified. It is 8
-    # MB default
-    resource.setrlimit(resource.RLIMIT_DATA,(mlimit,mlimit))
-
     # Create childprocess as setuid_helper and pass the executable
     # to it along with the file descriptors for the streams. This
     # will let the OS handle buffering of I/O.
@@ -68,6 +57,7 @@ def run(submission, testcase):
                                      "debug=%s" % str(get_log_level()),
                                      "memlimit=%d" % mlimit,
                                      "timelimit=%d" % tlimit,
+                                     "maxfilesize=%d" % OUTPUT_FILE_SIZE,
                                      exec_file],
                                     stdin = instream,
                                     stdout = outstream,
