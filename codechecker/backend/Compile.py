@@ -2,6 +2,7 @@
 # multiple languages.
 
 import subprocess
+from misc_utils import write_to_disk
 
 class Compile:
     
@@ -16,12 +17,7 @@ class Compile:
                             stderr = subprocess.PIPE)
         out, err = child.communicate()
         return child.returncode == 0, err     
-    
-    def _write_to_disk(self, text, filename):
-        f = file(filename, "w")
-        f.write(text)
-        f.close()
-    
+        
 class C_Compile(Compile):
     def __init__(self, config):
         Compile(self, config)
@@ -29,11 +25,12 @@ class C_Compile(Compile):
 
     def compile(self, submission):
         basename = self.config.runpath + str(submission.pk) 
-        self._write_to_disk(submission.submissionCode, basename + ".c")
-        self.compile_cmd = config.config.get("CompileCommands", "C_compile").
-                                                replace("%s", basename + ".c").
-                                                replace("%e", basename + ".exe")
-            
+        write_to_disk(submission.submissionCode, basename + ".c")
+        self.compile_cmd = config.config.get("CompileCommands", "C_compile"
+                                             ).replace("%s", basename + ".c"
+                                                       ).replace("%e", basename + ".exe")
+        self.exec_string = self.exec_string.replace("%e", basename + ".exe")    
+
         #compiling the submission
         return Compile.compile()
              
@@ -46,10 +43,11 @@ class CPP_Compile(Compile):
 
     def compile(self, submission):
         basename = self.config.runpath + str(submission.pk) 
-        self._write_to_disk(submission.submissionCode, basename + ".cpp")
-        self.compile_cmd = config.config.get("CompileCommands", "CPP_compile").
-                                                replace("%s", basename + ".cpp").
-                                                replace("%e", basename + ".exe")
+        write_to_disk(submission.submissionCode, basename + ".cpp")
+        self.compile_cmd = config.config.get("CompileCommands", "CPP_compile"
+                                             ).replace("%s", basename + ".cpp"
+                                                       ).replace("%e", basename + ".exe")
+        self.exec_string = self.exec_string.replace("%e", basename + ".exe")    
             
         #compiling the submission
         return Compile.compile()
