@@ -96,7 +96,6 @@ class Submission(models.Model):
     def __unicode__(self):
         return repr(self.pk)   
 
-
 class TestCase(models.Model):
     problem = models.ForeignKey(Problem)
     inputFile = models.TextField()
@@ -105,6 +104,13 @@ class TestCase(models.Model):
     def __unicode__(self):
         testCase = 'problem' + repr(self.pk)
         return testCase
+
+class TestSet(models.Model):
+    problem = models.ForeignKey(Problem)
+    testcase = models.ForeignKey(TestCase)
+
+    def __unicode__(self):
+        return "TestSet" + repr(self.pk)
 
 
 # Forms 
