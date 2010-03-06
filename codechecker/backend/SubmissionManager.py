@@ -4,6 +4,7 @@
 from Compile import *
 from TestsRunner import TestsRunner
 from Score import Score
+from codechecker.Logger import log
 
 class SubmissionManager:
     
@@ -13,6 +14,7 @@ class SubmissionManager:
 
     def process_submission(self, submission):
         
+        log('process_submission #%s' % str(submission.pk))
         submission.result = "CMP"
         res, err = self.do_compile(submission)
 
@@ -21,6 +23,7 @@ class SubmissionManager:
             submission.submissionPenalty = 20
             submission.result = "CMPE"
             submission.save()
+            return
 
         self.do_test_and_evaluate(submission)
 
@@ -29,13 +32,13 @@ class SubmissionManager:
         return
 
     def do_compile(self, submission):
-        if submission.submissionLang == 'C':
+        if submission.submissionLang == 'c':
             self.compile = C_Compile(self.config)
-            res, err = c_compile.compile(submission)
+            res, err = self.compile.compile(submission)
 
-        elif submission.submissionLang == 'CPP':  
+        elif submission.submissionLang == 'cpp':  
             self.compile = CPP_Compile(self.config)
-            res, err = cpp_compile.compile(submission)
+            res, err = self.compile.compile(submission)
         
         else:
             pass
@@ -43,8 +46,8 @@ class SubmissionManager:
         return res, err
             
     def do_test_and_evaluate(self, submission):
-        tests_runner = TestsRunner(self.config, self.compile)
-        tests_runner.run_tests(submission)         
+        tests_runner = TestsRunner(self.config, self.compile, submission)
+        tests_runner.run_tests()         
         
 
 

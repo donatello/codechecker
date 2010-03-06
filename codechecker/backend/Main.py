@@ -7,7 +7,7 @@ import threading
 
 sys.path.append("/opt/checker")
 from codechecker.contests.models import Submission,Problem
-from utils.Logger import Logger as log
+from codechecker.Logger import log
 from Config import Config
 from SubmissionManager import SubmissionManager
 

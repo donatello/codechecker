@@ -4,6 +4,7 @@
 from codechecker.contests.models import Submission, Problem, TestCase, TestSet, Contest
 from misc_utils import write_to_disk
 from codechecker.Logger import *
+import os, stat, subprocess, sys, signal
 
 class TestsRunner:
     
@@ -19,13 +20,13 @@ class TestsRunner:
         self.submission.result = "RUN"
         self.submission.save()
 
-        testsets = TestSet.object.filter(problem = self.submission.problem)
+        testsets = TestSet.objects.filter(problem = self.submission.problem)
         for testset in testsets:
-            all_testcases = TestCase.objects.filter(testset_id = testset.id)
+            all_testcases = TestCase.objects.filter(testset = testset)
             to_break = False
             for testcase in all_testcases:
                 self.test(testcase)                
-                res = self.evaluate(testcase, test_result)
+                res = self.evaluate(testcase)
                 if not res:
                     to_break = True
                     break
@@ -40,15 +41,15 @@ class TestsRunner:
 
         # create input file
         self.infile = self.config.runpath + str(self.submission.pk) + ".in"
-        write_to_disk(testcase.inputFile, infile)
+        write_to_disk(testcase.inputFile, self.infile)
         
         # create output and error files and allow "others" to write
         self.outfile = self.config.runpath + str(self.submission.pk) + ".out"
-        write_to_disk("", outfile)
+        write_to_disk("", self.outfile)
         self.errfile = self.config.runpath + str(self.submission.pk) + ".err"
-        write_to_disk("", errfile)
-        os.chmod(outfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
-        os.chmod(errfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
+        write_to_disk("", self.errfile)
+        os.chmod(self.outfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
+        os.chmod(self.errfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
 
         # Get problem specific limits
         prob = Problem.objects.get(id = self.submission.problem_id)
@@ -56,7 +57,7 @@ class TestsRunner:
         mlimit = prob.mlimit
 
         log('Running executable %s with input file as %s' 
-            % (self.compile.exec_string,infile))
+            % (self.compile.exec_string, self.infile))
 
         # Call setuid_helper to execute the child
         helper_child = subprocess.Popen([self.config.shPath, 
@@ -121,7 +122,7 @@ class TestsRunner:
 
          
     # Evaluates the result of a run against a testcase.
-    def evaluate(self, testcase, test_result):
+    def evaluate(self, testcase, test_result = None):
 
         # Reload submission from db here?!
         # self.submission = Submission.objects.get(id = submission.id)
