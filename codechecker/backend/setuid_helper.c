@@ -29,8 +29,9 @@ struct sigaction alarm_act;
 char *opts[NO_OPTS] = {"debug", "memlimit", "timelimit", "maxfilesize"};
 
 int main(int argc, char* argv[]) {
-/* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB> maxfilesize=MB <submission-exec>
-  No error checking done, since this will be run only by the Code checker. */
+/* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB>
+  maxfilesize=<MB> <submission-exec> No error checking done, since
+  this will be run only by the Code checker. */
 
   int i, debug, memlimit, timelimit, maxfilesize;
   for(i=1; i< argc; i++) 

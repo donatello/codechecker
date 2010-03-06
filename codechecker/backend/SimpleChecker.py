@@ -1,6 +1,6 @@
 # This file implements SimpleChecker which is just a routine to run a
 # user submission against a given test case and report if the result
-# to the caller. 
+# to the caller.
 
 #!/usr/bin/python
 import os, stat, signal
