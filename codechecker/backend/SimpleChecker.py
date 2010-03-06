@@ -119,12 +119,10 @@ class SimpleChecker:
         # create reference output file
         chkfile = str(file_root + '.ref')
         f = open(chkfile, "w")
-        f.write(testcase.outputFile)
+        f.write(testcase.outputFile.
+                replace('\r\n','\n')) # Replace windows newline with
+                                      # linux newline
         f.close()
-
-        # fixes the dos format of ref files (caused because of MySQL?!)
-        fromdos_ret = subprocess.call(["fromdos",chkfile])
-        #print "Return code", fromdos_ret
 
         # Reload submission from db here?!
         submission = Submission.objects.get(id = submission.id)
