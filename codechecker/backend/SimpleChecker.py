@@ -54,7 +54,7 @@ class SimpleChecker:
         # Create childprocess as setuid_helper and pass the executable
         # to it along with the file descriptors for the streams. This
         # will let the OS handle buffering of I/O.
-        helper_child = subprocess.Popen(["/opt/checker/codechecker/backend/setuid_helper", 
+        helper_child = subprocess.Popen([self.config.shPath, 
                                          "debug=%s" % str(get_log_level()),
                                          "memlimit=%d" % mlimit,
                                          "timelimit=%d" % tlimit,
