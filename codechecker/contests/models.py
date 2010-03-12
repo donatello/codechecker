@@ -92,6 +92,9 @@ class Submission(models.Model):
     submissionPenalty = models.IntegerField(default=0)
     submissionPoints = models.IntegerField(default=0)
     submissionCode = models.TextField()    
+    compile_errmsg = models.TextField(default="")
+    runtime = models.IntegerField(default=0)
+    memusage = models.IntegerField(default=0)
     
     def __unicode__(self):
         return repr(self.pk)   
