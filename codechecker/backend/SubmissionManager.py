@@ -21,6 +21,7 @@ class SubmissionManager:
         if not res:
             submission.submissionPoints = 0
             submission.submissionPenalty = 20
+            submission.compile_errmsg = err
             submission.result = "CMPE"
             submission.save()
             return
