@@ -1,5 +1,4 @@
-from codechecker.contests.models import *
-from django.contrib import admin
+from models import *
 
 class ContestAdmin(admin.ModelAdmin):
     list_display = ( 'title' , 'startDateTime', 'endDateTime' )
@@ -25,10 +24,3 @@ class TestSetAdmin(admin.ModelAdmin):
     list_display = ('pk', 'problem', 'testcase')
     search_fields = ['problem', 'testcase']
 
-admin.site.register(Contest, ContestAdmin)
-admin.site.register(Team, TeamAdmin)
-admin.site.register(Problem, ProblemAdmin)
-admin.site.register(TestCase)
-admin.site.register(TestSet, TestSetAdmin)
-admin.site.register(Submission, SubmissionAdmin)
-admin.site.register(TempReg, TempRegAdmin)

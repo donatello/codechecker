@@ -72,7 +72,7 @@ class TestSet(models.Model):
     points = models.IntegerField()
     
     def __unicode__(self):
-        return str(problem) + '-' + str(points)
+        return (str(self.problem) + '-' + str(self.points))
 
 # Each TestSet has Testcases, which is an atomic test for a submission. It has 
 # an input and an corresponding Judge output to that.
@@ -83,7 +83,7 @@ class Testcase(models.Model):
     output = models.TextField()
 
     def __unicode__(self):
-        return str(testSet)
+        return str(self.testSet)
 
 # Users can submit their solution to a problem. A submission has a result, time 
 # of submission, penalty for that submission, points for the submission, 
