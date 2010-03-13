@@ -1,26 +1,27 @@
 from models import *
 
 class ContestAdmin(admin.ModelAdmin):
-    list_display = ( 'title' , 'startDateTime', 'endDateTime' )
+    list_display = ( 'title' , 'startTime', 'endTime' )
     search_fields = ['title']
 
-class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ['name',]
-
 class ProblemAdmin(admin.ModelAdmin):
-    list_display = ( 'problemCode', 'contest') 
-    search_fields = ['problemCode', 'contest']
+    list_display = ( 'pcode', 'contest') 
+    search_fields = ['pcode', 'contest']
 
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ( 'pk', 'user', 'problem', 'result', 'submissionPoints', ) 
+    list_display = ( 'pk', 'user', 'problem', 'result', 'points', ) 
     search_fields = [ 'pk', 'user', 'problem', 'result', ] 
 
-class TempRegAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'primary_email')
-    search_fields = ['name']
-
 class TestSetAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'problem', 'testcase')
-    search_fields = ['problem', 'testcase']
+    list_display = ('pk', 'problem', 'points')
+    search_fields = ['problem', 'points']
+    
+class TestCaseAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'testSet')
+
+admin.site.register(Contest, ContestAdmin)
+admin.site.register(Problem, ProblemAdmin)
+admin.site.register(Submission, SubmissionAdmin)
+admin.site.register(TestSet, TestSetAdmin)
+admin.site.register(Testcase, TestCaseAdmin)
 
