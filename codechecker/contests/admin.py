@@ -21,9 +21,14 @@ class TempRegAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'primary_email')
     search_fields = ['name']
 
+class TestSetAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'problem', 'testcase')
+    search_fields = ['problem', 'testcase']
+
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Problem, ProblemAdmin)
 admin.site.register(TestCase)
+admin.site.register(TestSet, TestSetAdmin)
 admin.site.register(Submission, SubmissionAdmin)
 admin.site.register(TempReg, TempRegAdmin)

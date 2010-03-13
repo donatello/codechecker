@@ -92,65 +92,12 @@ class Submission(models.Model):
     submissionPenalty = models.IntegerField(default=0)
     submissionPoints = models.IntegerField(default=0)
     submissionCode = models.TextField()    
+    compile_errmsg = models.TextField(default="")
+    runtime = models.IntegerField(default=0)
+    memusage = models.IntegerField(default=0)
     
     def __unicode__(self):
         return repr(self.pk)   
-
-    # The prefix underscore implies that the function is not an
-    # exported interface (i think).
-    def _generate_compile_command(self, runpath):
-        s = str('')
-        file_root = runpath + str(self.pk) 
-
-        if self.get_submissionLang_display() == 'C++':
-            s = ('g++ -O2 -Wall -o ' + str(file_root)  + '.exe ' + 
-                 str(str(file_root) + '.' + self._get_filename_extension()))
-
-        elif self.get_submissionLang_display() == 'C':
-            s = ('gcc -O2 -Wall -lm -o ' + str(file_root)  + '.exe ' + 
-                 str(str(file_root) + '.' + self._get_filename_extension()))
-
-        elif self.get_submissionLang_display() == 'JAVA':
-            s = 'do nothing for now '
-
-        else:
-            s = 'oh no'            
-
-        return s
-
-    def _get_filename_extension(self):
-        if self.get_submissionLang_display() == 'C++':
-            return "cpp"
-        elif self.get_submissionLang_display() == 'C':
-            return "c"
-        elif self.get_submissionLang_display() == 'JAVA':
-            return "java"
-        else:
-            return "c"
-
-    def write_code_to_disk(self, runpath):
-        f = open(runpath + str(self.pk) + '.' + self._get_filename_extension(),'w')
-        f.write(self.submissionCode)
-        f.close()
-
-    def compile(self, runpath):
-        import subprocess
-        cmd = self._generate_compile_command(runpath)
-        self.result = 'CMP'
-        self.save()
-        compile = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        compile_out = compile.communicate()
-        print "COMPILER STDOUT: ", compile_out[0]
-        print "COMPILER STDERR: ", compile_out[1]
-        return compile_out[1]
-        
-    def check_compile_result(self, runpath):
-        import os
-        if os.path.exists(runpath + str(self.pk) + '.exe') == 0:
-            self.result = 'CMPE'
-            self.save()
-            return False
-        return True
 
 class TestCase(models.Model):
     problem = models.ForeignKey(Problem)
@@ -160,6 +107,13 @@ class TestCase(models.Model):
     def __unicode__(self):
         testCase = 'problem' + repr(self.pk)
         return testCase
+
+class TestSet(models.Model):
+    problem = models.ForeignKey(Problem)
+    testcase = models.ForeignKey(TestCase)
+
+    def __unicode__(self):
+        return "TestSet" + repr(self.pk)
 
 
 # Forms 
