@@ -35,17 +35,17 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/'
+MEDIA_ROOT = '/opt/checker/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/media/'
     
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/opt/checker/media/'
+ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'c-!9p5ilaaa-j^%l@w)7dscx@(&!g-0kixd4z6vo@6iov#gzyj'
@@ -81,22 +81,5 @@ INSTALLED_APPS = (
     'django.contrib.admin',    
     'codechecker.contests',
 )
-
-
-#Codecheker specific Changes 
-#Edit these as you see fit
-LOGIN_URL = '/site/login/'
-LOGIN_REDIRECT_URL = '/site/'
-DEFAULT_FROM_EMAIL = 'projectjeeves@gmail.com'
-SERVER_EMAIL = 'projectjeeves@gmail.com'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'projectjeeves@gmail.com'
-EMAIL_HOST_PASSWORD = 'rosesarered'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-#Edit this to be your hostname instance that goes in the confirmation mail 
-HOST = 'guesthost'
-
 
 
