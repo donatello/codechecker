@@ -26,7 +26,7 @@ class C_Compile(Compile):
 
     def compile(self, submission):
         basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.submissionCode, basename + ".c")
+        write_to_disk(submission.code, basename + ".c")
         self.compile_cmd = self.config.config.get("CompileCommands", "C_compile"
                                                   ).replace("%s", basename + ".c"
                                                             ).replace("%e", basename + ".exe")
@@ -43,7 +43,7 @@ class CPP_Compile(Compile):
 
     def compile(self, submission):
         basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.submissionCode, basename + ".cpp")
+        write_to_disk(submission.code, basename + ".cpp")
         self.compile_cmd = self.config.config.get("CompileCommands", "CPP_compile"
                                              ).replace("%s", basename + ".cpp"
                                                        ).replace("%e", basename + ".exe")

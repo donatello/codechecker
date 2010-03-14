@@ -1,7 +1,7 @@
 # This class does the scoring for a submission using the results of
 # all tests passed by it.
 
-from codechecker.contests.models import Submission, Problem, TestCase, TestSet, Contest
+from codechecker.contests.models import Submission, Problem, Testcase, TestSet, Contest
 
 class Score:
     

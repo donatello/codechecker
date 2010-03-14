@@ -1,7 +1,7 @@
 # This class has methods to run each test against the submission and
 # evaluate correctness.
 
-from codechecker.contests.models import Submission, Problem, TestCase, TestSet, Contest
+from codechecker.contests.models import Submission, Problem, Testcase, TestSet, Contest
 from misc_utils import write_to_disk
 from codechecker.Logger import *
 import os, stat, subprocess, sys, signal
@@ -22,7 +22,7 @@ class TestsRunner:
 
         testsets = TestSet.objects.filter(problem = self.submission.problem)
         for testset in testsets:
-            all_testcases = TestCase.objects.filter(testset = testset)
+            all_testcases = Testcase.objects.filter(testSet = testset)
             to_break = False
             for testcase in all_testcases:
                 self.test(testcase)                
@@ -41,7 +41,7 @@ class TestsRunner:
 
         # create input file
         self.infile = self.config.runpath + str(self.submission.pk) + ".in"
-        write_to_disk(testcase.inputFile, self.infile)
+        write_to_disk(testcase.input, self.infile)
         
         # create output and error files and allow "others" to write
         self.outfile = self.config.runpath + str(self.submission.pk) + ".out"
@@ -130,7 +130,7 @@ class TestsRunner:
         if self.submission.result == 'RUN' :
             # create reference output file
             self.chkfile = self.config.runpath + '.ref'
-            write_to_disk(testcase.outputFile.
+            write_to_disk(testcase.output.
                           replace('\r\n','\n'), # Replace windows
                                                 # newline with linux
                                                 # newline

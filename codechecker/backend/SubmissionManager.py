@@ -19,9 +19,9 @@ class SubmissionManager:
         res, err = self.do_compile(submission)
 
         if not res:
-            submission.submissionPoints = 0
-            submission.submissionPenalty = 20
-            submission.compile_errmsg = err
+            submission.points = 0
+            submission.penalty = 20
+            submission.errors = err
             submission.result = "CMPE"
             submission.save()
             return
@@ -33,11 +33,11 @@ class SubmissionManager:
         return
 
     def do_compile(self, submission):
-        if submission.submissionLang == 'c':
+        if submission.language == 'c':
             self.compile = C_Compile(self.config)
             res, err = self.compile.compile(submission)
 
-        elif submission.submissionLang == 'cpp':  
+        elif submission.language == 'cpp':  
             self.compile = CPP_Compile(self.config)
             res, err = self.compile.compile(submission)
         
