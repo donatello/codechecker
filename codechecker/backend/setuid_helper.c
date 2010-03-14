@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     lim.rlim_cur = lim.rlim_max = maxfilesize << 20;
     ret = setrlimit(RLIMIT_FSIZE, &lim);
 
-    ret = execvp(argv[argc-1], NULL);    
+    ret = execvp(argv[NO_OPTS+1], argv+NO_OPTS+1);    
     
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
