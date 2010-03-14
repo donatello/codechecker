@@ -53,7 +53,6 @@ int main(int argc, char* argv[]) {
     else if (!strncmp(name, opts[6], strlen(opts[6]))) strcpy(errfile, value);
   }
 
-
   // fork argv[1]
   p = fork();
   if (!p) { 

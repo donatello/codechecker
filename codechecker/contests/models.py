@@ -7,6 +7,7 @@ from django import forms
 LANG_TYPES = (
     ('c','C'),
     ('cpp','C++'),
+    ('py','PYTHON 2.6.4'),
     #(3,'JAVA'),
 )
 

@@ -68,8 +68,8 @@ class TestsRunner:
                                          "errfile=%s" % self.errfile,
                                          "memlimit=%d" % mlimit,
                                          "timelimit=%d" % tlimit,
-                                         "maxfilesize=%d" % self.config.outputLimit,
-                                         self.compile.exec_string])
+                                         "maxfilesize=%d" % self.config.outputLimit]
+                                        + self.compile.exec_string.split())
         
         try:
             
