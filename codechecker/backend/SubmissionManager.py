@@ -4,17 +4,18 @@
 from Compile import *
 from TestsRunner import TestsRunner
 from Score import Score
-from codechecker.Logger import log
+from codechecker.Logger import Logger
+
 
 class SubmissionManager:
     
     def __init__(self, config):
         self.config = config
         self.compile = None
+        self.log = Logger(__file__, config.config.get("BackendMain", "LogFile")).log
 
     def process_submission(self, submission):
-        
-        log('process_submission #%s' % str(submission.pk))
+        self.log('process_submission #%s' % str(submission.pk), Logger.DEBUG)
         submission.result = "CMP"
         res, err = self.do_compile(submission)
 

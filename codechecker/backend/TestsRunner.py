@@ -13,6 +13,7 @@ class TestsRunner:
         self.compile = compile
         self.submission = submission
         self.infile = self.outfile = self.errfile = self.chkfile = None
+        self.log = Logger(__file__, config.config.get("BackendMain", "LogFile")).log
 
     # Main function for this class. Finds all testcases for this
     # submission and calls test() and evaluate() on each of them.
@@ -56,12 +57,12 @@ class TestsRunner:
         tlimit = prob.tlimit
         mlimit = prob.mlimit
 
-        log('Running executable %s with input file as %s' 
-            % (self.compile.exec_string, self.infile))
+        self.log('Running executable %s with input file as %s' 
+            % (self.compile.exec_string, self.infile), Logger.DEBUG)
 
         # Call setuid_helper to execute the child
         helper_child = subprocess.Popen([self.config.shPath, 
-                                         "debug=%s" % str(get_log_level()),
+                                         "debug=%s" % str(Logger.DEBUG),
                                          "infile=%s" % self.infile,
                                          "outfile=%s" % self.outfile,
                                          "errfile=%s" % self.errfile,
@@ -74,17 +75,17 @@ class TestsRunner:
             
             helper_child.communicate()
 
-            log("return code for helper_child = %d" % helper_child.returncode)
+            self.log("return code for helper_child = %d" % helper_child.returncode, Logger.DEBUG)
 
             #check for the magic condition that tells that execvp
             #failed in the setuid program
             if helper_child.returncode == 111:
-                log('EXECVE failed in the child!!!!')
+                self.log('EXECVE failed in the child!!!!', Logger.DEBUG)
                 os._exit(0)
 
             if helper_child.returncode > 0:
-                log('Code execution failed with exit status: '
-                    + str(helper_child.returncode) + ' \n')
+                self.log('Code execution failed with exit status: '
+                    + str(helper_child.returncode) + ' \n', Logger.DEBUG)
                 sig = helper_child.returncode
 
 
@@ -109,14 +110,14 @@ class TestsRunner:
                 else :                    
                     self.submission.result = 'UNKN'
 
-                log('submission result = %s' % self.submission.result)
+                self.log('submission result = %s' % self.submission.result, Logger.DEBUG)
                 self.submission.save()
             elif helper_child.returncode == 0 :
-                log('Code execution successful with exit status 0')
+                self.log('Code execution successful with exit status 0', Logger.DEBUG)
 
         except :
-            log('Unknown exception. setuid_helper died on us! Comments : \n' +
-                str(sys.exc_info()[0]) + str(sys.exc_info()[1]) )
+            self.log('Unknown exception. setuid_helper died on us! Comments : \n' +
+                str(sys.exc_info()[0]) + str(sys.exc_info()[1]), Logger.DEBUG)
             self.submission.result = 'WTF'
             self.submission.save()
 
@@ -141,7 +142,7 @@ class TestsRunner:
                                      stdout=subprocess.PIPE)
             diff_op = check.communicate()[0]
             if diff_op == '' :
-                log("Testcase #%s output matched." % testcase.id)
+                self.log("Testcase #%s output matched." % testcase.id, Logger.DEBUG)
 
             else :
                 self.submission.result = 'WA'
