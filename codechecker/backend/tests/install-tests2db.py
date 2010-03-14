@@ -4,21 +4,19 @@ sys.path.append("/opt/checker")
 from codechecker.contests.models import Submission, User, Problem
 
 def submit_to_db(files):
-    lang_dict = {'C' : 1, 'CPP' : 2}
+    lang_dict = {'C' : "c", 'CPP' : "cpp"}
     for fname in files:
       ext = fname.rsplit(".", 1)[1]
       sub = Submission()
       sub.user = User.objects.get(id = 1)
       sub.problem = Problem.objects.get(id = 1) 
       sub.result = "QU"
-      sub.submissionTime = datetime.datetime.now() 
-      sub.submissionLang = lang_dict[ext.upper()]
-      sub.submissionPenalty = 0
-      sub.submissionPoints = 0
-      sub.submissionCode = file(fname, "r").read()
-      sub.compile_errmsg = ""
-      sub.runtime = 0
-      sub.memusage = 0
+      sub.time = datetime.datetime.now() 
+      sub.language = lang_dict[ext.upper()]
+      sub.penalty = 0
+      sub.points = 0
+      sub.code = file(fname, "r").read()
+      sub.errors = ""
       sub.save()
       
 if __name__ == "__main__":
