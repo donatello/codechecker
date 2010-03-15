@@ -108,7 +108,7 @@ class TestsRunner:
                     self.submission.result = 'ABRT'
 
                 else :                    
-                    self.submission.result = 'UNKN'
+                    self.submission.result = 'RTE'
 
                 self.log('submission result = %s' % self.submission.result, Logger.DEBUG)
                 self.submission.save()
