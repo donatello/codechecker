@@ -93,19 +93,19 @@ int main(int argc, char* argv[]) {
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
   wait(&status);
   if(debug) 
-    fprintf(fp, "submission %s status = %d\n", argv[argc-1], status);  
+    fprintf(fp, "submission %s status = %d errno = %d\n", argv[argc-1], status, errno);  
   if (WIFSIGNALED(status)) {
     if(debug) 
-      fprintf(fp, "submission %s signalled status = %d\n", argv[argc-1], WTERMSIG(status));
+      fprintf(fp, "submission %s signalled status = %d errno = %d\n", argv[argc-1], WTERMSIG(status), errno);
     return WTERMSIG(status);
   }
   if (WIFEXITED(status)) {
     if(debug) 
-      fprintf(fp, "child %s exited normally with status = %d\n", argv[argc-1], WEXITSTATUS(status));
+      fprintf(fp, "child %s exited normally with status = %d errno = %d\n", argv[argc-1], WEXITSTATUS(status), errno);
     return WEXITSTATUS(status);
   }
   if(debug) 
     fprintf(fp, "child %s did not exit normally and did not get"
-	    " signalled, exited with status = %d\n", argv[argc-1], status);
+	    " signalled, exited with status = %d errno = %d\n", argv[argc-1], status, errno);
   return status;
 }
