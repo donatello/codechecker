@@ -90,10 +90,15 @@ int main(int argc, char* argv[]) {
   alarm(timelimit+2); 
 
   int status;
+  struct rusage submission_stats;
+
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
-  wait(&status);
-  if(debug) 
-    fprintf(fp, "submission %s status = %d errno = %d\n", argv[argc-1], status, errno);  
+  wait3(&status, 0, &submission_stats);
+  if(debug) { 
+    fprintf(fp, "submission %s user_time = %Ld secs + %Ld mu secs sys_time = %Ld secs + %Ld mu secs data_seg_size = %ld\n", argv[argc-1],
+        (long long)submission_stats.ru_utime.tv_sec, (long long)submission_stats.ru_utime.tv_usec,
+        (long long)submission_stats.ru_stime.tv_sec, (long long)submission_stats.ru_stime.tv_usec, submission_stats.ru_maxrss);
+  }
   if (WIFSIGNALED(status)) {
     if(debug) 
       fprintf(fp, "submission %s signalled status = %d errno = %d\n", argv[argc-1], WTERMSIG(status), errno);
