@@ -25,7 +25,7 @@ RESULT_TYPES = (
     ('FPE', 'FLOATING POINT ERROR'),
     ('KILL', 'KILLED'),    
     ('ABRT', 'ABORT SIGNALLED'),    
-    ('UNKN', 'NON ZERO RETURN STATUS'),
+    ('RTE', 'RUN TIME ERROR'),
     ('WTF', 'NON ZERO RETURN STATUS'),
 )
 
