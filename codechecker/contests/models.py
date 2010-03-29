@@ -104,3 +104,18 @@ class Submission(models.Model):
     def __unicode__(self):
         return repr(self.pk)   
 
+# This table logs the result of the evaluation of a submission against
+# a testcase. It is to be used in the scoring module for a submission
+# to aggregate the results of each testcase.
+class TestCaseEval(models.Model):
+    submission = models.ForeignKey(Submission)
+    testcase = models.ForeignKey(Testcase)
+    # memusage is in kilobytes
+    mem_usage = models.IntegerField(default=0) 
+    # cputime is the total time in seconds (float - microsecond
+    # precision).
+    cpu_time = models.FloatField(default=0)
+    # submission score for this (submission,testcase) pair
+    score = models.IntegerField(default=0)
+    # submission misc info
+    misc_info = models.TextField()
