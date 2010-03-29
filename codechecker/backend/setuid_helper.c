@@ -18,7 +18,7 @@ for its child process.
 #include <signal.h>
 #include <string.h>
 
-#define NO_OPTS 7
+#define NO_OPTS 9
 #define MAX_PATH_SIZE 300
 
 pid_t p;
@@ -31,14 +31,14 @@ static void alarm_handler(int signo)
 
 struct sigaction alarm_act;
 char *opts[NO_OPTS] = {"debug", "memlimit", "timelimit", "maxfilesize",
-                         "infile", "outfile", "errfile"};
+                         "infile", "outfile", "errfile", "testcaseid", "submissionid"};
 
 int main(int argc, char* argv[]) {
 /* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB>
-  maxfilesize=<MB> infile=<name> outfile=<name> errfile=<name> <submission-exec>
+  maxfilesize=<MB> infile=<name> outfile=<name> errfile=<name> testcaseid=<tid> submissionid=<subid> <submission-exec>
   No error checking done, since this will be run only by the Code checker. */
 
-  int i, debug, memlimit, timelimit, maxfilesize;
+  int i, debug, memlimit, timelimit, maxfilesize, testcaseid, submissionid;
   char infile[MAX_PATH_SIZE], outfile[MAX_PATH_SIZE], errfile[MAX_PATH_SIZE];
   for(i=1; i< argc; i++) 
   {
@@ -51,6 +51,8 @@ int main(int argc, char* argv[]) {
     else if (!strncmp(name, opts[4], strlen(opts[4]))) strcpy(infile, value);
     else if (!strncmp(name, opts[5], strlen(opts[5]))) strcpy(outfile, value);
     else if (!strncmp(name, opts[6], strlen(opts[6]))) strcpy(errfile, value);
+    else if (!strncmp(name, opts[7], strlen(opts[7]))) testcaseid = atoi(value);
+    else if (!strncmp(name, opts[8], strlen(opts[8]))) submissionid = atoi(value);
   }
 
   // fork argv[1]
@@ -61,6 +63,7 @@ int main(int argc, char* argv[]) {
     freopen(errfile, "w", stderr);
 
     //drop priveleges
+    //TODO: fetch the uid to run the submission from TestRunner.py
     setuid(1002);    
 
     struct rlimit lim ;
@@ -93,12 +96,15 @@ int main(int argc, char* argv[]) {
   struct rusage submission_stats;
 
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
-  wait3(&status, 0, &submission_stats);
-  if(debug) { 
-    fprintf(fp, "submission %s user_time = %Ld secs + %Ld mu secs sys_time = %Ld secs + %Ld mu secs data_seg_size = %ld\n", argv[argc-1],
-        (long long)submission_stats.ru_utime.tv_sec, (long long)submission_stats.ru_utime.tv_usec,
-        (long long)submission_stats.ru_stime.tv_sec, (long long)submission_stats.ru_stime.tv_usec, submission_stats.ru_maxrss);
-  }
+  FILE *fs = fopen("/tmp/stats", "w");
+  int wait_ret = wait3(&status, 0, &submission_stats);
+  if(wait_ret != -1)
+    fprintf(fs, "%d|%d|%lf\n", testcaseid, submissionid, 
+        submission_stats.ru_utime.tv_sec + (1e-6) * submission_stats.ru_utime.tv_usec);
+
+  else 
+    fprintf(fs, "%d|%d|%d\n", testcaseid, submissionid, -1);
+    
   if (WIFSIGNALED(status)) {
     if(debug) 
       fprintf(fp, "submission %s signalled status = %d errno = %d\n", argv[argc-1], WTERMSIG(status), errno);
@@ -112,5 +118,7 @@ int main(int argc, char* argv[]) {
   if(debug) 
     fprintf(fp, "child %s did not exit normally and did not get"
 	    " signalled, exited with status = %d errno = %d\n", argv[argc-1], status, errno);
+  fclose(fp);
+  fclose(fs);
   return status;
 }
