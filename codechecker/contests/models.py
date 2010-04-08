@@ -51,11 +51,12 @@ class Contest(models.Model):
 
 class Problem(models.Model):
 
-    #Problem metadata fields follow
+    #Problem related metadata fields follow
     contest = models.ForeignKey(Contest)
     pcode = models.CharField(max_length = 25)
     penalty = models.IntegerField()
     is_approximate = models.BooleanField(default = False)
+    cust_eval = models.FileField(upload_to = "/tmp", default = None)
 
     #Fields related to the display of the problem statement follow:
     statement = models.TextField()
