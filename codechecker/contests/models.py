@@ -77,14 +77,14 @@ class Problem(models.Model):
         
 # Each problem has several TestSet. A Test set is a set of tests a submission 
 # for that problem has to pass to get some score assigned to that TestSet. 
-# Testset belongs to a problem and has points.
+# Testset belongs to a problem and has a maximum score.
 
 class TestSet(models.Model):
     problem = models.ForeignKey(Problem)
-    points = models.IntegerField()
+    maxScore = models.IntegerField()
     
     def __unicode__(self):
-        return str(problem) + '-' + str(points)
+        return str(problem) + '-' + str(maxScore)
 
 # Each TestSet has Testcases, which is an atomic test for a submission. It has 
 # an input and an corresponding Judge output to that.
@@ -92,13 +92,12 @@ class TestSet(models.Model):
 class Testcase(models.Model):
     testSet = models.ForeignKey(TestSet)
     input = models.TextField()
-    output = models.TextField()
 
     def __unicode__(self):
         return str(testSet)
 
 # Users can submit their solution to a problem. A submission has a result, time 
-# of submission, penalty for that submission, points for the submission, 
+# of submission, penalty for that submission, score for the submission, 
 # submitted code and any error message that were generated for the submission 
 # during the evaluation of the submission
 class Submission(models.Model):
@@ -108,7 +107,7 @@ class Submission(models.Model):
     time = models.DateTimeField()
     language = models.CharField(max_length=10, choices=LANG_TYPES)
     penalty = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
     code = models.TextField()    
     errors = models.TextField()
     
