@@ -50,16 +50,27 @@ class Contest(models.Model):
 # for a wrong submission.
 
 class Problem(models.Model):
+
+    #Problem metadata fields follow
     contest = models.ForeignKey(Contest)
     pcode = models.CharField(max_length = 25)
+    penalty = models.IntegerField()
+    is_approximate = models.BooleanField(default = False)
+
+    #Fields related to the display of the problem statement follow:
     statement = models.TextField()
-    notes = models.TextField()
+    constraints = models.TextField() # Info about input constraints.
     sampleInput = models.TextField()
     sampleOutput = models.TextField()
-    tlimit = models.IntegerField()
-    mlimit = models.IntegerField()
+    scoring_info = models.TextField() # Info about how the problem
+                                      # will be scored.
+    tlimit = models.IntegerField() # (in seconds)
+    mlimit = models.IntegerField() # (in MiB)
     allowedLangs = models.CommaSeparatedIntegerField(max_length=10)
-    penalty = models.IntegerField()
+    source_limit = models.IntegerField(default=50) # The max source
+                                                   # file size allowed
+                                                   # for the problem
+                                                   # (in KiB).    
 
     def __unicode__(self):
         return self.pcode
