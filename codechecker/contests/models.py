@@ -92,6 +92,7 @@ class TestSet(models.Model):
 class Testcase(models.Model):
     testSet = models.ForeignKey(TestSet)
     input = models.TextField()
+    output = models.TextField()
 
     def __unicode__(self):
         return str(testSet)
