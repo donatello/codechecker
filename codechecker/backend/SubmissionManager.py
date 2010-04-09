@@ -42,6 +42,10 @@ class SubmissionManager:
             self.compile = CPP_Compile(self.config)
             res, err = self.compile.compile(submission)
 
+        elif submission.language == 'p':  
+            self.compile = Pascal_Compile(self.config)
+            res, err = self.compile.compile(submission)
+
         elif submission.language == 'py':  
             self.compile = Python_Compile(self.config)
             res, err = self.compile.compile(submission)

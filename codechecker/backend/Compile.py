@@ -66,3 +66,20 @@ class Python_Compile(Compile):
             
         #compiling the submission
         return Compile.compile(self, submission)
+
+class Pascal_Compile(Compile):
+    def __init__(self, config):
+        Compile.__init__(self, config)
+        self.exec_string = config.config.get("CompileCommands", "Pascal_run")
+
+    def compile(self, submission):
+        basename = self.config.runpath + str(submission.pk) 
+        write_to_disk(submission.code, basename + ".p")
+        self.compile_cmd = self.config.config.get("CompileCommands", "Pascal_compile"
+                                                  ).replace("%s", basename + ".p"
+                                                            ).replace("%e", basename + ".exe")
+        self.exec_string = self.exec_string.replace("%e", basename + ".exe")    
+
+        #compiling the submission
+        return Compile.compile(self, submission)             
+
