@@ -137,16 +137,25 @@ class TestsRunner:
                                                 # newline
                           self.chkfile) 
 
-            # check the diff
-            check = subprocess.Popen('diff -Bb ' + self.outfile + ' ' + self.chkfile, shell=True,
-                                     stdout=subprocess.PIPE)
-            diff_op = check.communicate()[0]
-            if diff_op == '' :
-                self.log("Testcase #%s was CORRECTLY answered!" % testcase.id, Logger.DEBUG)
+            #Decide how to evaluate based on if a setter binary is
+            #given for this problem:
+            prob = Problem.objects.filter(problem = self.submission.problem)
+            if prob.cust_eval != None:
 
-            else :
-                self.submission.result = 'WA'
-                self.submission.save()
+                #Is an approximate problem. Evaluate using cust_eval
+                #TODO: Complete this stub.
+
+                pass
+            else:
+                #not approximate, use default diff method.
+                check = subprocess.Popen('diff -Bb ' + self.outfile + ' ' + self.chkfile, shell=True,
+                                         stdout=subprocess.PIPE)
+                diff_op = check.communicate()[0]
+                if diff_op == '' :
+                    self.log("Testcase #%s was CORRECTLY answered!" % testcase.id, Logger.DEBUG)
+                else :
+                    self.submission.result = 'WA'
+                    self.submission.save()
 
         # Cleaning up test case reference output, input, output and
         # error files.
