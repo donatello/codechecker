@@ -142,7 +142,7 @@ class TestsRunner:
                                      stdout=subprocess.PIPE)
             diff_op = check.communicate()[0]
             if diff_op == '' :
-                self.log("Testcase #%s output matched." % testcase.id, Logger.DEBUG)
+                self.log("Testcase #%s was CORRECTLY answered!" % testcase.id, Logger.DEBUG)
 
             else :
                 self.submission.result = 'WA'
