@@ -35,7 +35,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/usr/local/lib/python2.6/dist-packages/django/contrib/admin/media/'
+MEDIA_ROOT = '/opt/checker/media/setter-bin/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
