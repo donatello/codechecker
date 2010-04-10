@@ -75,45 +75,11 @@ class TestsRunner:
             
             helper_child.communicate()
 
-            self.log("return code for helper_child = %d" % helper_child.returncode, Logger.DEBUG)
+            retval = self.process_returncode(helper_child.returncode)
 
-            #check for the magic condition that tells that execvp
-            #failed in the setuid program
-            if helper_child.returncode == 111:
-                self.log('EXECVE failed in the child!!!!', Logger.DEBUG)
-                os._exit(0)
-
-            if helper_child.returncode > 0:
-                self.log('Code execution failed with exit status: '
-                    + str(helper_child.returncode) + ' \n', Logger.DEBUG)
-                sig = helper_child.returncode
-
-
-                if sig == signal.SIGXCPU :
-                    self.submission.result = 'TLE'
-
-                elif sig == signal.SIGXFSZ :
-                    self.submission.result = 'OUTE'
-
-                elif sig == signal.SIGSEGV :
-                    self.submission.result = 'SEG'
-
-                elif sig == signal.SIGFPE :
-                    self.submission.result = 'FPE'
-
-                elif sig == signal.SIGKILL :
-                    self.submission.result = 'KILL'
-
-                elif sig == signal.SIGABRT :
-                    self.submission.result = 'ABRT'
-
-                else :                    
-                    self.submission.result = 'RTE'
-
-                self.log('submission result = %s' % self.submission.result, Logger.DEBUG)
-                self.submission.save()
-            elif helper_child.returncode == 0 :
-                self.log('Code execution successful with exit status 0', Logger.DEBUG)
+            self.log("Setting submission status to %s" % retval, Logger.DEBUG)
+            self.submission.result = retval
+            self.submission.save()
 
         except :
             self.log('Unknown exception. setuid_helper died on us! Comments : \n' +
@@ -121,6 +87,49 @@ class TestsRunner:
             self.submission.result = 'WTF'
             self.submission.save()
 
+    def process_returncode(self, returncode):
+        self.log("[return code processing debug output STARTS]", Logger.DEBUG)
+        self.log("RETURN CODE = %d" % returncode, Logger.DEBUG)
+
+        #check for the magic condition that tells that execvp
+        #failed in the setuid program
+        if returncode == 111:
+            self.log('EXECVE failed in the child!! Exiting NOW!', Logger.DEBUG)
+            os._exit(0)
+
+        retval = ""
+
+        if returncode > 0:
+            self.log('Code execution FAILED!', Logger.DEBUG)
+
+            if returncode == signal.SIGXCPU:
+                retval = 'TLE'
+
+            elif returncode == signal.SIGXFSZ:
+                retval = 'OUTE'
+
+            elif returncode == signal.SIGSEGV:
+                retval = 'SEG'
+
+            elif returncode == signal.SIGFPE:
+                retval = 'FPE'
+
+            elif returncode == signal.SIGKILL:
+                retval = 'KILL'
+
+            elif returncode == signal.SIGABRT:
+                retval = 'ABRT'
+
+            else:                    
+                retval = 'RTE'
+
+            self.log('retval = %s' % retval, Logger.DEBUG)
+        elif returncode == 0:
+            retval = "RUN"
+            self.log('Execution successful with exit status 0', Logger.DEBUG)
+            
+        self.log('[return code processing debug output ENDS]', Logger.DEBUG)
+        return retval
          
     # Evaluates the result of a run against a testcase.
     def evaluate(self, testcase, test_result = None):
