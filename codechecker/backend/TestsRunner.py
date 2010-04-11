@@ -62,13 +62,13 @@ class TestsRunner:
 
         # Call setuid_helper to execute the child
         helper_child = subprocess.Popen([self.config.shPath, 
-                                         "debug=%s" % str(Logger.DEBUG),
-                                         "infile=%s" % self.infile,
-                                         "outfile=%s" % self.outfile,
-                                         "errfile=%s" % self.errfile,
-                                         "memlimit=%d" % mlimit,
-                                         "timelimit=%d" % tlimit,
-                                         "maxfilesize=%d" % self.config.outputLimit]
+                                         "--debug=%s" % str(Logger.DEBUG),
+                                         "--infile=%s" % self.infile,
+                                         "--outfile=%s" % self.outfile,
+                                         "--errfile=%s" % self.errfile,
+                                         "--memlimit=%d" % mlimit,
+                                         "--timelimit=%d" % tlimit,
+                                         "--maxfilesz=%d" % self.config.outputLimit]
                                         + self.compile.exec_string.split())
         
         try:
