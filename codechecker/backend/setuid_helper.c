@@ -15,12 +15,14 @@ for its child process.
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <getopt.h>
 
-#define NO_OPTS 9
-#define MAX_PATH_SIZE 300
+#define MAX_PATH_LEN 300
 
+struct sigaction alarm_act;
 pid_t p;
 
 static void alarm_handler(int signo) 
@@ -29,31 +31,78 @@ static void alarm_handler(int signo)
   kill(p, SIGKILL);
 }
 
-struct sigaction alarm_act;
-char *opts[NO_OPTS] = {"debug", "memlimit", "timelimit", "maxfilesize",
-                         "infile", "outfile", "errfile", "testcaseid", "submissionid"};
-
 int main(int argc, char* argv[]) {
 /* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB>
   maxfilesize=<MB> infile=<name> outfile=<name> errfile=<name> testcaseid=<tid> submissionid=<subid> <submission-exec>
   No error checking done, since this will be run only by the Code checker. */
+  int c;
+  int debug, timelimit, memlimit, maxfilesz, testcaseid, submissionid;
+  char infile[MAX_PATH_LEN], outfile[MAX_PATH_LEN], errfile[MAX_PATH_LEN];
+  while(1) {
+    static struct option long_options[] =
+      {
+          /* These options set a flag. */
+          {"debug",  required_argument, 0, 0},
+          {"timelimit",  required_argument, 0, 0},
+          {"memlimit",  required_argument, 0, 0},
+          {"maxfilesz",  required_argument, 0, 0},
+          {"testcaseid",  required_argument, 0, 0},
+          {"submissionid",  required_argument, 0, 0},
+          {"infile",  required_argument, 0, 0},
+          {"outfile",  required_argument, 0, 0},
+          {"errfile",  required_argument, 0, 0},
+          {0, 0, 0, 0}
+      };
+    int option_index = 0;
+    c = getopt_long (argc, argv, "",
+                     long_options, &option_index);
+    if(c == -1) 
+      break;
 
-  int i, debug, memlimit, timelimit, maxfilesize, testcaseid, submissionid;
-  char infile[MAX_PATH_SIZE], outfile[MAX_PATH_SIZE], errfile[MAX_PATH_SIZE];
-  for(i=1; i< argc; i++) 
-  {
-    char *name = strtok(argv[i], "="),
-         *value = strtok(NULL, "=");
-    if (!strncmp(name, opts[0], strlen(opts[0]))) debug = value[0] - '0';
-    else if (!strncmp(name, opts[1], strlen(opts[1]))) memlimit = atoi(value);
-    else if (!strncmp(name, opts[2], strlen(opts[2]))) timelimit = atoi(value);
-    else if (!strncmp(name, opts[3], strlen(opts[3]))) maxfilesize = atoi(value);
-    else if (!strncmp(name, opts[4], strlen(opts[4]))) strcpy(infile, value);
-    else if (!strncmp(name, opts[5], strlen(opts[5]))) strcpy(outfile, value);
-    else if (!strncmp(name, opts[6], strlen(opts[6]))) strcpy(errfile, value);
-    else if (!strncmp(name, opts[7], strlen(opts[7]))) testcaseid = atoi(value);
-    else if (!strncmp(name, opts[8], strlen(opts[8]))) submissionid = atoi(value);
+    switch (c) {
+      case 0:
+        switch (option_index) {
+          case 0: debug = atoi(optarg);
+                  break;
+
+          case 1: timelimit = atoi(optarg);
+                  break;
+
+          case 2: memlimit = atoi(optarg);
+                  break;
+
+          case 3: maxfilesz = atoi(optarg);
+                  break;
+
+          case 4: testcaseid = atoi(optarg);
+                  break;
+
+          case 5: submissionid = atoi(optarg);
+                  break;
+
+          case 6: strcpy(infile, optarg);
+                  break;
+
+          case 7: strcpy(outfile, optarg);
+                  break;
+
+          case 8: strcpy(errfile, optarg);
+                  break;
+        }
+
+       /*   printf("option_index = %d\n", option_index);
+        printf ("option %s", long_options[option_index].name);
+
+        if (optarg)
+          printf (" with arg %s", optarg);
+        printf ("\n");
+      */
+        break;
+      default: 
+        abort();
+    }
   }
+    
 
   // fork argv[1]
   p = fork();
@@ -77,10 +126,10 @@ int main(int argc, char* argv[]) {
     lim.rlim_cur = timelimit; lim.rlim_max = timelimit + 1;
     ret = setrlimit(RLIMIT_CPU, &lim);
 
-    lim.rlim_cur = lim.rlim_max = maxfilesize << 20;
+    lim.rlim_cur = lim.rlim_max = maxfilesz << 20;
     ret = setrlimit(RLIMIT_FSIZE, &lim);
 
-    ret = execvp(argv[NO_OPTS+1], argv+NO_OPTS+1);    
+    ret = execvp(argv[optind], argv+optind);    
     
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
