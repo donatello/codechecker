@@ -148,7 +148,7 @@ class TestsRunner:
 
             #Decide how to evaluate based on if a setter binary is
             #given for this problem:
-            prob = Problem.objects.filter(problem = self.submission.problem)
+            prob = Problem.objects.get(id = self.submission.problem_id)
             if prob.cust_eval != None:
 
                 #Is an approximate problem. Evaluate using cust_eval
