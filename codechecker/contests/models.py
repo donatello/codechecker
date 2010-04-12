@@ -57,6 +57,8 @@ class Problem(models.Model):
     penalty = models.IntegerField()
     is_approximate = models.BooleanField(default = False)
     cust_eval = models.FileField(upload_to = "/tmp", default = None)
+    cust_minScore = models.IntegerField(default = 0)
+    cust_maxScore = models.IntegerField(default = 100)
 
     #Fields related to the display of the problem statement follow:
     statement = models.TextField()
@@ -119,7 +121,7 @@ class Submission(models.Model):
 # This table logs the result of the evaluation of a submission against
 # a testcase. It is to be used in the scoring module for a submission
 # to aggregate the results of each testcase.
-class TestCaseEval(models.Model):
+class TestcaseEval(models.Model):
     submission = models.ForeignKey(Submission)
     testcase = models.ForeignKey(Testcase)
     # memusage is in kilobytes
@@ -129,5 +131,7 @@ class TestCaseEval(models.Model):
     cpu_time = models.FloatField(default=0)
     # submission score for this (submission,testcase) pair
     score = models.IntegerField(default=0)
+    # pass/fail status
+    pass_status = models.CharField(max_length=10)
     # submission misc info
     misc_info = models.TextField()
