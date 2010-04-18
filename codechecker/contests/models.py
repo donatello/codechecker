@@ -7,6 +7,7 @@ from django import forms
 LANG_TYPES = (
     ('c','C'),
     ('cpp','C++'),
+    ('py','PYTHON 2.6.4'),
     #(3,'JAVA'),
 )
 
@@ -24,7 +25,7 @@ RESULT_TYPES = (
     ('FPE', 'FLOATING POINT ERROR'),
     ('KILL', 'KILLED'),    
     ('ABRT', 'ABORT SIGNALLED'),    
-    ('UNKN', 'NON ZERO RETURN STATUS'),
+    ('RTE', 'RUN TIME ERROR'),
     ('WTF', 'NON ZERO RETURN STATUS'),
 )
 
@@ -49,30 +50,44 @@ class Contest(models.Model):
 # for a wrong submission.
 
 class Problem(models.Model):
+
+    #Problem related metadata fields follow
     contest = models.ForeignKey(Contest)
     pcode = models.CharField(max_length = 25)
+    penalty = models.IntegerField()
+    is_approximate = models.BooleanField(default = False)
+    cust_eval = models.FileField(upload_to = "/tmp", default = None)
+    cust_minScore = models.IntegerField(default = 0)
+    cust_maxScore = models.IntegerField(default = 100)
+
+    #Fields related to the display of the problem statement follow:
     statement = models.TextField()
-    notes = models.TextField()
+    constraints = models.TextField() # Info about input constraints.
     sampleInput = models.TextField()
     sampleOutput = models.TextField()
-    tlimit = models.IntegerField()
-    mlimit = models.IntegerField()
+    scoring_info = models.TextField() # Info about how the problem
+                                      # will be scored.
+    tlimit = models.IntegerField() # (in seconds)
+    mlimit = models.IntegerField() # (in MiB)
     allowedLangs = models.CommaSeparatedIntegerField(max_length=10)
-    penalty = models.IntegerField()
+    source_limit = models.IntegerField(default=50) # The max source
+                                                   # file size allowed
+                                                   # for the problem
+                                                   # (in KiB).    
 
     def __unicode__(self):
         return self.pcode
         
 # Each problem has several TestSet. A Test set is a set of tests a submission 
 # for that problem has to pass to get some score assigned to that TestSet. 
-# Testset belongs to a problem and has points.
+# Testset belongs to a problem and has a maximum score.
 
 class TestSet(models.Model):
     problem = models.ForeignKey(Problem)
-    points = models.IntegerField()
+    maxScore = models.IntegerField()
     
     def __unicode__(self):
-        return (str(self.problem) + '-' + str(self.points))
+        return str(problem) + '-' + str(maxScore)
 
 # Each TestSet has Testcases, which is an atomic test for a submission. It has 
 # an input and an corresponding Judge output to that.
@@ -86,7 +101,7 @@ class Testcase(models.Model):
         return str(self.testSet)
 
 # Users can submit their solution to a problem. A submission has a result, time 
-# of submission, penalty for that submission, points for the submission, 
+# of submission, penalty for that submission, score for the submission, 
 # submitted code and any error message that were generated for the submission 
 # during the evaluation of the submission
 class Submission(models.Model):
@@ -96,10 +111,27 @@ class Submission(models.Model):
     time = models.DateTimeField()
     language = models.CharField(max_length=10, choices=LANG_TYPES)
     penalty = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
     code = models.TextField()    
     errors = models.TextField()
     
     def __unicode__(self):
         return repr(self.pk)   
 
+# This table logs the result of the evaluation of a submission against
+# a testcase. It is to be used in the scoring module for a submission
+# to aggregate the results of each testcase.
+class TestcaseEval(models.Model):
+    submission = models.ForeignKey(Submission)
+    testcase = models.ForeignKey(Testcase)
+    # memusage is in kilobytes
+    mem_usage = models.IntegerField(default=0) 
+    # cputime is the total time in seconds (float - microsecond
+    # precision).
+    cpu_time = models.FloatField(default=0)
+    # submission score for this (submission,testcase) pair
+    score = models.IntegerField(default=0)
+    # pass/fail status
+    pass_status = models.CharField(max_length=10)
+    # submission misc info
+    misc_info = models.TextField()
