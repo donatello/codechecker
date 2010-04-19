@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 # Current Language types that are supported
 LANG_TYPES = ( 
     ( 'c', 'C' ),
