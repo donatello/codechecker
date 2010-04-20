@@ -95,7 +95,8 @@ class Java_Compile(Compile):
         self.compile_cmd = self.config.config.get("CompileCommands", "Java_compile"
                                                   ).replace("%s", self.config.runpath + "Main.java")
         self.exec_string = self.exec_string.replace("%c", "Main"
-                                                     ).replace("%l", self.config.heapsize+"m")
+                                                     ).replace("%l", self.config.heapsize+"m"
+                                                             ).replace("%p", self.config.runpath)
 
         #compiling the submission
         return Compile.compile(self, submission)             

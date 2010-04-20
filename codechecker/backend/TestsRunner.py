@@ -79,7 +79,7 @@ class TestsRunner:
                                          "--memlimit=%d" % mlimit,
                                          "--timelimit=%d" % tlimit,
                                          "--maxfilesz=%d" % self.config.outputLimit,
-                                         "--executable=%s" % self.compile.exec_string.split()])
+                                         "--executable=%s" % self.compile.exec_string])
         
         try:
             

@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
   int debug, timelimit, memlimit, maxfilesz, testcaseid, submissionid;
   char infile[MAX_PATH_LEN], outfile[MAX_PATH_LEN], errfile[MAX_PATH_LEN], exec_string[MAX_PATH_LEN];
   char *targv[MAX_ARGS];
+  int cnt = 0;
   while(1) {
     static struct option long_options[] =
       {
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
           case 9: strcpy(exec_string, optarg);
                   //demarshall the executable optarg into argv
                   targv[0] = strtok(exec_string, " ");
-                  int cnt = 1;
+                  cnt = 1;
                   while(targv[cnt] = strtok(NULL, " ")) cnt++;
                   break;
         }
@@ -167,17 +168,17 @@ int main(int argc, char* argv[]) {
     
   if (WIFSIGNALED(status)) {
     if(debug) 
-      fprintf(fp, "submission %s signalled status = %d errno = %d\n", argv[argc-1], WTERMSIG(status), errno);
+      fprintf(fp, "submission %s signalled status = %d errno = %d\n", targv[cnt-1], WTERMSIG(status), errno);
     return WTERMSIG(status);
   }
   if (WIFEXITED(status)) {
     if(debug) 
-      fprintf(fp, "child %s exited normally with status = %d errno = %d\n", argv[argc-1], WEXITSTATUS(status), errno);
+      fprintf(fp, "child %s exited normally with status = %d errno = %d\n", targv[cnt-1], WEXITSTATUS(status), errno);
     return WEXITSTATUS(status);
   }
   if(debug) 
     fprintf(fp, "child %s did not exit normally and did not get"
-	    " signalled, exited with status = %d errno = %d\n", argv[argc-1], status, errno);
+	    " signalled, exited with status = %d errno = %d\n", targv[cnt-1], status, errno);
   fclose(fp);
   fclose(fs);
   return status;
