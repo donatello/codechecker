@@ -87,7 +87,7 @@ class TestSet(models.Model):
     maxScore = models.IntegerField()
     
     def __unicode__(self):
-        return str(problem) + '-' + str(maxScore)
+        return str(self.problem) + '-' + str(self.maxScore)
 
 # Each TestSet has Testcases, which is an atomic test for a submission. It has 
 # an input and an corresponding Judge output to that.
