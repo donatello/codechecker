@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import *
 
 urlpatterns = patterns( 'codechecker.contests.submissions',
         ( r'^$', 'default' ),
