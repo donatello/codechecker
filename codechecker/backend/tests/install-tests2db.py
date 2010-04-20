@@ -4,7 +4,7 @@ sys.path.append("/opt/checker")
 from codechecker.contests.models import Submission, User, Problem
 
 def submit_to_db(files):
-    lang_dict = {'C' : "c", 'CPP' : "cpp", "PY" : "py", "P" : "p"}
+    lang_dict = {'C' : "c", 'CPP' : "cpp", "PY" : "py", "P" : "p", "JAVA" : "java"}
     for fname in files:
       ext = fname.rsplit(".", 1)[1]
       sub = Submission()

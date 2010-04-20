@@ -21,6 +21,7 @@ for its child process.
 #include <getopt.h>
 
 #define MAX_PATH_LEN 300
+#define MAX_ARGS 20
 
 struct sigaction alarm_act;
 pid_t p;
@@ -37,7 +38,8 @@ int main(int argc, char* argv[]) {
   No error checking done, since this will be run only by the Code checker. */
   int c;
   int debug, timelimit, memlimit, maxfilesz, testcaseid, submissionid;
-  char infile[MAX_PATH_LEN], outfile[MAX_PATH_LEN], errfile[MAX_PATH_LEN];
+  char infile[MAX_PATH_LEN], outfile[MAX_PATH_LEN], errfile[MAX_PATH_LEN], exec_string[MAX_PATH_LEN];
+  char *targv[MAX_ARGS];
   while(1) {
     static struct option long_options[] =
       {
@@ -51,6 +53,7 @@ int main(int argc, char* argv[]) {
           {"infile",  required_argument, 0, 0},
           {"outfile",  required_argument, 0, 0},
           {"errfile",  required_argument, 0, 0},
+          {"executable",  required_argument, 0, 0},
           {0, 0, 0, 0}
       };
     int option_index = 0;
@@ -88,18 +91,25 @@ int main(int argc, char* argv[]) {
 
           case 8: strcpy(errfile, optarg);
                   break;
+
+          case 9: strcpy(exec_string, optarg);
+                  //demarshall the executable optarg into argv
+                  targv[0] = strtok(exec_string, " ");
+                  int cnt = 1;
+                  while(targv[cnt] = strtok(NULL, " ")) cnt++;
+                  break;
         }
 
-       /*   printf("option_index = %d\n", option_index);
+         /*   printf("option_index = %d\n", option_index);
         printf ("option %s", long_options[option_index].name);
 
         if (optarg)
           printf (" with arg %s", optarg);
         printf ("\n");
-      */
+        */
+      
         break;
-      default: 
-        abort();
+      default:; 
     }
   }
     
@@ -129,7 +139,8 @@ int main(int argc, char* argv[]) {
     lim.rlim_cur = lim.rlim_max = maxfilesz << 20;
     ret = setrlimit(RLIMIT_FSIZE, &lim);
 
-    ret = execvp(argv[optind], argv+optind);    
+    ret = execvp(targv[0], targv+1); 
+    printf("%s\n", targv[1]);
     
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
