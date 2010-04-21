@@ -1,7 +1,5 @@
-from django.db.models import CommaSeparatedIntegerField
 import models
 from django.contrib import admin
-from django import forms
 
 # Admin interface for the Contest Model
 class ContestAdmin(admin.ModelAdmin):
