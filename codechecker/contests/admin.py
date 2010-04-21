@@ -25,6 +25,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 class TestCaseEvalAdmin(admin.ModelAdmin):
     pass
 
+# Map all the Admin site with the respective models.
 admin.site.register(models.Contest, ContestAdmin)
 admin.site.register(models.Problem, ProblemAdmin)
 admin.site.register(models.TestSet, TestSetAdmin)
