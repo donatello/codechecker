@@ -8,6 +8,7 @@ class Config:
         self.config.read("utils/codechecker.conf")
         self.runpath = self.config.get("BackendMain", "RunsPath")
         self.outputLimit = int(self.config.get("BackendMain","OutputFileSizeLimit"))
+        self.heapsize = self.config.get("RuntimeLimits", "HeapSize")
         
         # Check if setuid_helper exists.
         self.shPath = self.config.get("BackendMain", "CheckerRoot") + "codechecker/backend/setuid_helper"
