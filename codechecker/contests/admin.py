@@ -3,6 +3,17 @@ from django.contrib import admin
 
 # Admin interface for the Contest Model
 class ContestAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ( 'General', {
+            'fields' : ('title','description',)
+        }),
+        ( 'Schedule', {
+            'fields' : ('startTime', 'endTime',)
+        }),
+        ( 'Status', {
+            'fields' : ('public', )
+        }),
+    )
     pass
 
 #Admin interface for the Problem Model
