@@ -52,28 +52,30 @@ class Contest(models.Model):
 class Problem(models.Model):
 
     #Problem related metadata fields follow
-    contest = models.ForeignKey(Contest)
-    pcode = models.CharField(max_length = 25)
-    penalty = models.IntegerField()
-    is_approximate = models.BooleanField(default = False)
-    cust_eval = models.FileField(upload_to = "/tmp", default = None)
-    cust_minScore = models.IntegerField(default = 0)
-    cust_maxScore = models.IntegerField(default = 100)
+    contest = models.ForeignKey(Contest, verbose_name = 'Contest')
+    pcode = models.CharField(max_length = 25, verbose_name = 'Problem Code')
+    penalty = models.IntegerField(verbose_name = 'Penalty')
+    is_approximate = models.BooleanField(default = False, 
+        verbose_name = 'Is Approximate')
+    cust_eval = models.FileField(upload_to = "/tmp", blank = True, 
+        default = None, verbose_name = 'Custom Evaluation executable')
+    cust_minScore = models.IntegerField(default = 0, verbose_name = "Min Score")
+    cust_maxScore = models.IntegerField(default = 100, verbose_name = "Max Score")
 
     #Fields related to the display of the problem statement follow:
     statement = models.TextField()
     constraints = models.TextField() # Info about input constraints.
-    sampleInput = models.TextField()
-    sampleOutput = models.TextField()
-    scoring_info = models.TextField() # Info about how the problem
-                                      # will be scored.
-    tlimit = models.IntegerField() # (in seconds)
-    mlimit = models.IntegerField() # (in MiB)
-    allowedLangs = models.CommaSeparatedIntegerField(max_length=10)
-    source_limit = models.IntegerField(default=50) # The max source
-                                                   # file size allowed
-                                                   # for the problem
-                                                   # (in KiB).    
+    sampleInput = models.TextField(verbose_name = "Sample Input")
+    sampleOutput = models.TextField(verbose_name = "Sample Output")
+    scoring_info = models.TextField(verbose_name = "Scoring Information") # Info 
+                                      # about how the problem will be scored.
+    tlimit = models.IntegerField(verbose_name = "Time Limit") # (in seconds)
+    mlimit = models.IntegerField(verbose_name = "Memory Limit") # (in MiB)
+    allowedLangs = models.CommaSeparatedIntegerField(max_length=10,
+        verbose_name = "Allowed Languages")
+    source_limit = models.IntegerField(default=50, 
+        verbose_name = "Max Source File Size") # The max source file size allowed
+                                          # for the problem (in KiB).    
 
     def __unicode__(self):
         return self.pcode
