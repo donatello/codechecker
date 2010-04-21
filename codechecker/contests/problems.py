@@ -5,7 +5,7 @@ urlpatterns = patterns( 'codechecker.contests.problems',
         ( r'^all/', 'show_all_problems' ),
         ( r'^all/(?P<page>\d+)/$', 'show_all_problems' ),
         ( r'^(?P<problem_id>\d+)/$', 'show_problem' ),
-        ( r'^(?P<problem_id>\d+)/submit/$', 'problem_submit' ),
+        ( r'^(?P<problem_id>\d+)/submit/$', 'submit' ),
         ( r'^(?P<problem_id>\d+)/(?P<action>\w+)/$', 'show_problem' ),
         ( r'^(?P<problem_id>\d+)/(?P<action>\w+)/(?P<page>\d+)/$', 'show_problem' ),
         )
