@@ -1,5 +1,7 @@
+from django.db.models import CommaSeparatedIntegerField
 import models
 from django.contrib import admin
+from django import forms
 
 # Admin interface for the Contest Model
 class ContestAdmin(admin.ModelAdmin):
@@ -14,11 +16,36 @@ class ContestAdmin(admin.ModelAdmin):
             'fields' : ('public', )
         }),
     )
-    pass
+
 
 #Admin interface for the Problem Model
 class ProblemAdmin(admin.ModelAdmin):
-    pass
+    
+    
+    fieldsets = (
+        ( 'General', {
+            'fields' : ('pcode', 'contest', ),                                
+        }),
+        ( 'Display', {
+            'classes': ('wide'),
+            'fields' : ('statement', 'constraints', 'scoring_info', 
+                'sampleInput', 'sampleOutput', ),
+        }),
+        ( 'Scoring', {
+            'classes': ('wide'),
+            'fields' : ('is_approximate', 'cust_minScore', 'cust_maxScore' , 
+                'penalty', ),
+        }),
+        ( 'Constraints', {
+            'classes': ('wide'),
+            'fields' : ('tlimit', 'mlimit', 'source_limit', 'allowedLangs', ),
+        }),
+        ( 'Custom Evaluation', {
+            'classes': ('collapse'),
+            'fields' : ('cust_eval', ),
+            
+        }),
+    )
 
 #Admin interface for the TestSet Model
 class TestSetAdmin(admin.ModelAdmin):
