@@ -16,9 +16,12 @@ class SubmissionManager:
 
     def process_submission(self, submission):
         self.log('process_submission #%s' % str(submission.pk), Logger.DEBUG)
-        submission.result = "CMP"
-        res, err = self.do_compile(submission)
 
+        # Compile the submission
+        submission.result = "CMP"
+        submission.save()
+        res, err = self.do_compile(submission)
+        
         if not res:
             submission.points = 0
             submission.penalty = 20
@@ -27,8 +30,10 @@ class SubmissionManager:
             submission.save()
             return
 
+        # Run all testcases against the submission.
         self.do_test_and_evaluate(submission)
 
+        # Score the submission
         if submission.result == "RUN":
             self.do_score(submission)
 
