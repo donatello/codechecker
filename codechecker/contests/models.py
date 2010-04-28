@@ -137,3 +137,18 @@ class TestcaseEval(models.Model):
     pass_status = models.CharField(max_length=10)
     # submission misc info
     misc_info = models.TextField()
+
+
+# This table logs the result of each testset.
+class TestSetEval(models.Model):
+    submission = models.ForeignKey(Submission)
+    testset = models.ForeignKey(TestSet)
+    score = models.IntegerField(default=0)
+    # TODO: some measure of aggregate CPU time for this testset
+    cpu_time = models.FloatField(default=0)
+    # TODO: some measure of aggregate memory usage for this testset
+    mem_usage = models.IntegerField(default=0) 
+    # pass/fail status
+    pass_status = models.CharField(max_length=10)
+    # submission misc info
+    misc_info = models.TextField()
