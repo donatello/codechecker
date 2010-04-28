@@ -87,17 +87,11 @@ class TestsRunner:
 
             retval = self.process_returncode(helper_child.returncode)
 
-            #self.log("Setting submission status to %s" % retval, Logger.DEBUG)
-            #self.submission.result = retval
-            #self.submission.save()
-
             return retval
 
         except :
             self.log('Unknown exception. setuid_helper died on us! Comments : \n' +
                 str(sys.exc_info()[0]) + str(sys.exc_info()[1]), Logger.DEBUG)
-            #self.submission.result = 'WTF'
-            #self.submission.save()
             sys.exit(1)
 
     def process_returncode(self, returncode):
@@ -167,12 +161,16 @@ class TestsRunner:
             else: #not approximate, use default diff method.
                 print "NON-APPROX PROBLEM"
                 # create reference output file
-                self.chkfile = self.config.runpath + '.ref'
+                self.chkfile = self.config.runpath + str(self.submission.pk) + '.ref'
+                
                 write_to_disk(testcase.output.
                               replace('\r\n','\n'), # Replace windows
                                                     # newline with linux
                                                     # newline
                               self.chkfile) 
+                # make sure that only this process can read the ref output file.
+                os.chmod(self.outfile, stat.S_IRUSR | stat.S_IWUSR)
+                
                 check = subprocess.Popen('diff -Bb ' + self.outfile + ' ' + self.chkfile, shell=True,
                                          stdout=subprocess.PIPE)
                 diff_op = check.communicate()[0]
@@ -184,14 +182,16 @@ class TestsRunner:
                     #self.submission.result = 'WA'
                     #self.submission.save()
                     ret_status["STATUS"] = "FAILED"
+                
+                # clean up the reference output file.
+                os.remove(self.chkfile)
+
+            # clean up the output/input files here.
+            os.remove(self.infile)
+            os.remove(self.outfile)
+            os.remove(self.errfile)
 
             return ret_status
 
-        # Cleaning up test case reference output, input, output and
-        # error files.
-        #os.remove(self.chkfile)
-        #os.remove(self.infile)
-        #os.remove(self.outfile)
-        #os.remove(self.errorfile)
 
         return self.submission.result == "RUN"
