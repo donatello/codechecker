@@ -23,31 +23,32 @@ class TestsRunner:
 
         testsets = TestSet.objects.filter(problem = self.submission.problem)
         for testset in testsets:
-            all_testcases = Testcase.objects.filter(testSet = testset)
-            finish_testing = False
-            for testcase in all_testcases:
+            testcases = Testcase.objects.filter(testSet = testset)
+            for testcase in testcases:
                 status = self.test(testcase)                
                 testEval = TestcaseEval()
                 testEval.submission = self.submission
                 testEval.testcase = testcase
-                if status == "RUN":
-                    test_status = self.evaluate(testcase)
 
+                if status != "RUN":
+                    testEval.pass_status = status
+                    testEval.save()
+                else:
+                    test_status = self.evaluate(testcase)
                     print "test_status: ", test_status
                     testEval.pass_status = test_status["STATUS"]
                     testEval.save()
-                else:
-                    testEval.pass_status = status
-                    testEval.save()
-
-                    self.submission.result = status
-                    self.submission.save()
-                    finish_testing = True                
-                    break
-
-            if finish_testing: break
-
-    # Runs the submission against a testcase
+                
+                # clean-up of input/output/ref files here
+                os.remove(self.infile)
+                os.remove(self.outfile)
+                os.remove(self.errfile)
+                if self.chkfile != None:
+                    os.remove(self.chkfile)
+                
+                    
+    # Runs the submission against a testcase. Returns the status value
+    # of the return code (like "RUN", "SEG", etc).
     def test(self, testcase):
 
         # create input file
@@ -95,60 +96,49 @@ class TestsRunner:
             sys.exit(1)
 
          
-    # Evaluates the result of a run against a testcase.
+    # Evaluates the result of a run against a testcase. Assumes that
+    # the status of the program is "RUN"
     def evaluate(self, testcase, test_result = None):
 
-        if self.submission.result == 'RUN' :
+        #Decide how to evaluate based on if a setter binary is
+        #given for this problem:
+        prob = Problem.objects.get(id = self.submission.problem_id)
+        ret_status = {}            
+        if prob.cust_eval != "":
+            print "APPROX PROBLEM"
 
-            #Decide how to evaluate based on if a setter binary is
-            #given for this problem:
-            prob = Problem.objects.get(id = self.submission.problem_id)
-            ret_status = {}            
-            if prob.cust_eval != "":
-                print "APPROX PROBLEM"
+            #Is an approximate problem. Evaluate using cust_eval
 
-                #Is an approximate problem. Evaluate using cust_eval
+            #TODO: Complete this stub.
 
-                #TODO: Complete this stub.
+            pass
+        else: #not approximate, use default diff method.
+            print "NON-APPROX PROBLEM"
+            # create reference output file
+            self.chkfile = self.config.runpath + str(self.submission.pk) + '.ref'
 
-                pass
-            else: #not approximate, use default diff method.
-                print "NON-APPROX PROBLEM"
-                # create reference output file
-                self.chkfile = self.config.runpath + str(self.submission.pk) + '.ref'
-                
-                write_to_disk(testcase.output.
-                              replace('\r\n','\n'), # Replace windows
-                                                    # newline with linux
-                                                    # newline
-                              self.chkfile) 
-                # make sure that only this process can read the ref output file.
-                os.chmod(self.outfile, stat.S_IRUSR | stat.S_IWUSR)
-                
-                check = subprocess.Popen('diff -Bb ' + self.outfile + ' ' + self.chkfile, shell=True,
-                                         stdout=subprocess.PIPE)
-                diff_op = check.communicate()[0]
-                if diff_op == '':
-                    self.log("Testcase #%s was CORRECTLY answered!" % testcase.id, Logger.DEBUG)
-                    print "Testcase #%s was CORRECTLY answered!" % testcase.id
-                    ret_status["STATUS"] = "PASSED"                    
-                else:
-                    #self.submission.result = 'WA'
-                    #self.submission.save()
-                    ret_status["STATUS"] = "FAILED"
-                
-                # clean up the reference output file.
-                os.remove(self.chkfile)
+            write_to_disk(testcase.output.
+                          replace('\r\n','\n'), # Replace windows
+                                                # newline with linux
+                                                # newline
+                          self.chkfile) 
+            # make sure that only this process can read the ref output file.
+            os.chmod(self.outfile, stat.S_IRUSR | stat.S_IWUSR)
 
-            # clean up the output/input files here.
-            os.remove(self.infile)
-            os.remove(self.outfile)
-            os.remove(self.errfile)
+            check = subprocess.Popen('diff -Bb ' + self.outfile + ' ' + self.chkfile, shell=True,
+                                     stdout=subprocess.PIPE)
+            diff_op = check.communicate()[0]
+            if diff_op == '':
+                self.log("Testcase #%s was CORRECTLY answered!" % testcase.id, Logger.DEBUG)
+                print "Testcase #%s was CORRECTLY answered!" % testcase.id
+                ret_status["STATUS"] = "PASSED"                    
+            else:
+                #self.submission.result = 'WA'
+                #self.submission.save()
+                ret_status["STATUS"] = "FAILED"
 
-            return ret_status
+        return ret_status
 
-        else: # The submission crashed due to some reason.
-            return None
 
     def process_returncode(self, returncode):
         self.log("[return code processing debug output STARTS]", Logger.DEBUG)
