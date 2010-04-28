@@ -131,6 +131,10 @@ int main(int argc, char* argv[]) {
     lim.rlim_cur = lim.rlim_max = 0; 
     int ret = setrlimit(RLIMIT_NPROC, &lim);
 
+    //set limit on largest file descriptor that can be opened.
+    lim.rlim_cur = lim.rlim_max = 4; 
+    ret = setrlimit(RLIMIT_NOFILE, &lim);
+
     lim.rlim_cur = lim.rlim_max = memlimit << 20;
     ret = setrlimit(RLIMIT_AS, &lim);
 
