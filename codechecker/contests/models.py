@@ -57,7 +57,7 @@ class Problem(models.Model):
     penalty = models.IntegerField(verbose_name = 'Penalty')
     is_approximate = models.BooleanField(default = False, 
         verbose_name = 'Is Approximate')
-    cust_eval = models.FileField(upload_to = "/tmp", blank = True, 
+    cust_eval = models.FileField(upload_to = "setter-bin/", blank = True, 
         default = None, verbose_name = 'Custom Evaluation executable')
     cust_minScore = models.IntegerField(default = 0, verbose_name = "Min Score")
     cust_maxScore = models.IntegerField(default = 100, verbose_name = "Max Score")
