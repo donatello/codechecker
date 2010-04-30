@@ -3,6 +3,8 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+# Enter the base location at which the site is to be served
+# Include both forward and trailing Slash 
 BASE_URL = '/site/'
 
 ADMINS = ( 
@@ -64,13 +66,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
  )
 
-ROOT_URLCONF = 'codechecker.urls'
+ROOT_URLCONF = 'codechecker.root_url'
 
 TEMPLATE_DIRS = ( 
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/opt/checker/media/templates',
+    '/opt/checker/templates',
  )
 
 INSTALLED_APPS = ( 
