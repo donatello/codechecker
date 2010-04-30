@@ -2,10 +2,12 @@ from django.template import RequestContext
 import django.shortcuts
 import datetime, sys
 import settings
+import codechecker.contests.models
+# This is a wrapper function to render_to_response which will have global 
+# variables that needs to be passed along with other context variables. 
+# Request Context is also passed here This should ideally become a decorator
+# for RequestContext. Will have to fix it as soon as I found it how.
 
-# This is a wrapper function to render_to_response which will have global variables that needs to be
-# passed along with other context variables. Request Context is also passed here
-# This should ideally become a decorator for RequestContext. Will have to fix it as soon as I found it how.
 def render_to_response( request, *args, **kwargs ):
     #our custom dictionary with additional Parameters
     template = args[0]
