@@ -57,7 +57,7 @@ class Problem(models.Model):
     penalty = models.IntegerField(verbose_name = 'Penalty')
     is_approximate = models.BooleanField(default = False, 
         verbose_name = 'Is Approximate')
-    cust_eval = models.FileField(upload_to = "/tmp", blank = True, 
+    cust_eval = models.FileField(upload_to = "setter-bin/", blank = True, 
         default = None, verbose_name = 'Custom Evaluation executable')
     cust_minScore = models.IntegerField(default = 0, verbose_name = "Min Score")
     cust_maxScore = models.IntegerField(default = 100, verbose_name = "Max Score")
@@ -133,6 +133,21 @@ class TestcaseEval(models.Model):
     cpu_time = models.FloatField(default=0)
     # submission score for this (submission,testcase) pair
     score = models.IntegerField(default=0)
+    # pass/fail status
+    pass_status = models.CharField(max_length=10)
+    # submission misc info
+    misc_info = models.TextField()
+
+
+# This table logs the result of each testset.
+class TestSetEval(models.Model):
+    submission = models.ForeignKey(Submission)
+    testset = models.ForeignKey(TestSet)
+    score = models.IntegerField(default=0)
+    # TODO: some measure of aggregate CPU time for this testset
+    cpu_time = models.FloatField(default=0)
+    # TODO: some measure of aggregate memory usage for this testset
+    mem_usage = models.IntegerField(default=0) 
     # pass/fail status
     pass_status = models.CharField(max_length=10)
     # submission misc info
