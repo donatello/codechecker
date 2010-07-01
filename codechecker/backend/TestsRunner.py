@@ -52,13 +52,13 @@ class TestsRunner:
     def test(self, testcase):
 
         # create input file
-        self.infile = self.config.runpath + str(self.submission.pk) + ".in"
+        self.infile = self.config.abs_path + str(self.submission.pk) + ".in"
         write_to_disk(testcase.input, self.infile)
         
         # create output and error files and allow "others" to write
-        self.outfile = self.config.runpath + str(self.submission.pk) + ".out"
+        self.outfile = self.config.abs_path + str(self.submission.pk) + ".out"
         write_to_disk("", self.outfile)
-        self.errfile = self.config.runpath + str(self.submission.pk) + ".err"
+        self.errfile = self.config.abs_path + str(self.submission.pk) + ".err"
         write_to_disk("", self.errfile)
         os.chmod(self.outfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
         os.chmod(self.errfile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IWOTH | stat.S_IROTH)
@@ -80,7 +80,8 @@ class TestsRunner:
                                          "--memlimit=%d" % mlimit,
                                          "--timelimit=%d" % tlimit,
                                          "--maxfilesz=%d" % self.config.outputLimit,
-                                         "--executable=%s" % self.compile.exec_string])
+                                         "--executable=%s" % self.compile.exec_string,
+                                         "--jail=%s" % self.config.jail_root])
         
         try:
             
@@ -115,7 +116,7 @@ class TestsRunner:
         else: #not approximate, use default diff method.
             print "NON-APPROX PROBLEM"
             # create reference output file
-            self.chkfile = self.config.runpath + str(self.submission.pk) + '.ref'
+            self.chkfile = self.config.abs_path + str(self.submission.pk) + '.ref'
 
             write_to_disk(testcase.output.
                           replace('\r\n','\n'), # Replace windows
