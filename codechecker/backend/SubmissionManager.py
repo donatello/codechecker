@@ -41,29 +41,22 @@ class SubmissionManager:
 
     def do_compile(self, submission):
         if submission.language == 'c':
-            self.compile = C_Compile(self.config)
-            res, err = self.compile.compile(submission)
-
+            self.compile = C_Compile(self.config, submission)
         elif submission.language == 'cpp':  
-            self.compile = CPP_Compile(self.config)
-            res, err = self.compile.compile(submission)
-
+            self.compile = CPP_Compile(self.config, submission)
         elif submission.language == 'p':  
-            self.compile = Pascal_Compile(self.config)
-            res, err = self.compile.compile(submission)
-
+            self.compile = Pascal_Compile(self.config, submission)
         elif submission.language == 'py':  
-            self.compile = Python_Compile(self.config)
-            res, err = self.compile.compile(submission)
-
+            self.compile = Python_Compile(self.config, submission)
         elif submission.language == 'java':  
-            self.compile = Java_Compile(self.config)
-            res, err = self.compile.compile(submission)
-        
+            self.compile = Java_Compile(self.config, submission)
         else:
-            pass
+            self.compile = None
+
+        if self.compile :
+            return self.compile.compile()
         
-        return res, err
+        pass
             
     def do_test_and_evaluate(self, submission):
         tests_runner = TestsRunner(self.config, self.compile, submission)
