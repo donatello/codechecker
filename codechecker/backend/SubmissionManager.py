@@ -56,7 +56,7 @@ class SubmissionManager:
         if self.compile :
             return self.compile.compile()
         
-        pass
+        return None,"Not a supported Language"
             
     def do_test_and_evaluate(self, submission):
         tests_runner = TestsRunner(self.config, self.compile, submission)
