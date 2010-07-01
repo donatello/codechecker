@@ -57,7 +57,7 @@ class CPP_Compile(Compile):
     
     def compile(self):
         
-        self.compile_cmd = self.compile_cmd.replace("%s", self.basename + '.cc'
+        self.compile_cmd = self.compile_cmd.replace("%s", self.basename + '.cpp'
                                     ).replace("%e", self.basename + '.exe')
                                     
         self.exec_string = self.exec_string.replace("%e", self.basename + '.exe')    
