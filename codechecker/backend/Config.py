@@ -6,10 +6,10 @@ class Config:
     def __init__(self):
         self.config = ConfigParser.ConfigParser()
         self.config.read("utils/codechecker.conf")
-        jail_root = self.config.get("BackendMain","JailRoot")
+        self.jail_root = self.config.get("BackendMain","JailRoot")
         runs_path = self.config.get("BackendMain", "RunsPath")
         self.runpath = os.path.join('/' , runs_path)
-        self.abs_path = os.path.join(jail_root, runs_path)
+        self.abs_path = os.path.join(self.jail_root, runs_path)
         self.outputLimit = int(self.config.get("BackendMain","OutputFileSizeLimit"))
         self.heapsize = self.config.get("RuntimeLimits", "HeapSize")
         

@@ -16,7 +16,7 @@ class Compile:
         self.exec_string = None
         
         #get the basename
-        self.basename = os.path.join(self.config.runpath , str(submission.pk))
+        self.basename = os.path.join(self.config.abs_path , str(submission.pk))
         #write the code to the file
         #the java submission file will also be created here but only Main.java
         #created in Java_Compile would be compiled and run. 
@@ -102,9 +102,9 @@ class Java_Compile(Compile):
         self.exec_string = config.config.get("CompileCommands", "Java_run")
 
     def compile(self): 
-        write_to_disk(self.submission.code, self.config.runpath + "Main.java")
+        write_to_disk(self.submission.code, self.config.abs_path + "Main.java")
         self.compile_cmd = self.config.config.get("CompileCommands", "Java_compile"
-                                                  ).replace("%s", self.config.runpath + "Main.java")
+                                                  ).replace("%s", self.config.abs_path + "Main.java")
         self.exec_string = self.exec_string.replace("%c", "Main"
                                                      ).replace("%l", self.config.heapsize+"m"
                                                              ).replace("%p", self.config.runpath)
