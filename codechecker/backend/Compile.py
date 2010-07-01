@@ -16,15 +16,12 @@ class Compile:
         self.exec_string = None
         
         #get the basename
-        jail_root = config.config.get("BackendMain","JailRoot")
-        run_path = config.config.get("BackendMain", "RunsPath")
-        self.basename = os.path.join(jail_root, run_path , str(submission.pk))
-        
+        self.basename = os.path.join(self.config.runpath , str(submission.pk))
         #write the code to the file
         #the java submission file will also be created here but only Main.java
         #created in Java_Compile would be compiled and run. 
-        write_to_disk(submission.code, self.basename + str(submission.language))
-        print self.basename + str(submission.language)
+        write_to_disk(submission.code, self.basename + '.' + str(submission.language))
+        
         
     # Returns a (Bool, String), where the bool represents success of
     # compilation, and String represents compiler stdout/err.
@@ -55,7 +52,7 @@ class C_Compile(Compile):
 class CPP_Compile(Compile):
     def __init__(self, config, submission):
         Compile.__init__(self, config, submission)
-        self.compile_cmd = config.config.GET("CompileCommands", "CPP_compile")
+        self.compile_cmd = config.config.get("CompileCommands", "CPP_compile")
         self.exec_string = config.config.get("CompileCommands", "CPP_run")
     
     def compile(self):
@@ -77,7 +74,7 @@ class Python_Compile(Compile):
     def compile(self): 
         
         self.compile_cmd = self.compile_cmd.replace("%s", self.basename + '.py')         
-        self.exec_string = self.exec_string.replace("%s", self.codefile + '.py')
+        self.exec_string = self.exec_string.replace("%s", self.basename + '.py')
             
         #compiling the submission
         return Compile.compile(self)
@@ -100,13 +97,12 @@ class Pascal_Compile(Compile):
 
 class Java_Compile(Compile):
     #Source code is written onto Main.java and the classname is expected to be Main
-    def __init__(self, config):
-        Compile.__init__(self, config)
+    def __init__(self, config, submission):
+        Compile.__init__(self, config, submission)
         self.exec_string = config.config.get("CompileCommands", "Java_run")
 
-    def compile(self, submission):
-        basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.code, self.config.runpath + "Main.java")
+    def compile(self): 
+        write_to_disk(self.submission.code, self.config.runpath + "Main.java")
         self.compile_cmd = self.config.config.get("CompileCommands", "Java_compile"
                                                   ).replace("%s", self.config.runpath + "Main.java")
         self.exec_string = self.exec_string.replace("%c", "Main"
@@ -114,4 +110,4 @@ class Java_Compile(Compile):
                                                              ).replace("%p", self.config.runpath)
 
         #compiling the submission
-        return Compile.compile(self, submission)             
+        return Compile.compile(self)             
