@@ -3,16 +3,32 @@
 
 import subprocess
 from misc_utils import write_to_disk
+import os.path
 
 class Compile:
     
-    def __init__(self, config):
+    def __init__(self, config, submission):
         self.config = config
-        self.compile_cmd = self.exec_string = None
+        self.submission = submission
+        
+        #set compile command and exec command to None, they will be set by the,
+        self.compile_cmd = None
+        self.exec_cmd = None
+        
+        #get the basename
+        jail_root = config.config.get("BackendMain","JailRoot")
+        run_path = config.config.get("BackendMain", "RunsPath")
+        self.basename = os.path.join(jail_root + run_path + str(submission.pk))
 
+        # the default code file name and executable names
+        #override them if necessary in the derived classes
+        self.codefile = self.basename + '.' + str(submission.language)
+        self.executable =  self.basename + '.' + 'exe'
+        self.exec_cmd = self.executable
+        
     # Returns a (Bool, String), where the bool represents success of
     # compilation, and String represents compiler stdout/err.
-    def compile(self, submission):
+    def compile(self):
         print self.compile_cmd
         child = subprocess.Popen(self.compile_cmd, stdout = subprocess.PIPE, 
                                  stderr = subprocess.PIPE, shell=True)
