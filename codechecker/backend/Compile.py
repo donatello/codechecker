@@ -13,7 +13,7 @@ class Compile:
         
         #set compile command and exec command to None, they will be set by the,
         self.compile_cmd = None
-        self.exec_cmd = None
+        self.exec_string = None
         
         #get the basename
         jail_root = config.config.get("BackendMain","JailRoot")
@@ -24,7 +24,6 @@ class Compile:
         #override them if necessary in the derived classes
         self.codefile = self.basename + '.' + str(submission.language)
         self.executable =  self.basename + '.' + 'exe'
-        self.exec_cmd = self.executable
         
     # Returns a (Bool, String), where the bool represents success of
     # compilation, and String represents compiler stdout/err.
@@ -36,68 +35,67 @@ class Compile:
         return child.returncode == 0, out+err     
         
 class C_Compile(Compile):
-    def __init__(self, config):
-        Compile.__init__(self, config)
+    def __init__(self, config, submission):
+        Compile.__init__(self, config, submission)
         self.exec_string = config.config.get("CompileCommands", "C_run")
 
-    def compile(self, submission):
-        basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.code, basename + ".c")
+    def compile(self):
+        write_to_disk(self.submission.code, self.codefile)
         self.compile_cmd = self.config.config.get("CompileCommands", "C_compile"
-                                                  ).replace("%s", basename + ".c"
-                                                            ).replace("%e", basename + ".exe")
-        self.exec_string = self.exec_string.replace("%e", basename + ".exe")    
+                                ).replace("%s", self.codefile
+                                    ).replace("%e", self.executable)
+        self.exec_string = self.exec_string.replace("%e", self.executable)    
 
         #compiling the submission
-        return Compile.compile(self, submission)             
+        return Compile.compile(self)             
 
     
 class CPP_Compile(Compile):
-    def __init__(self, config):
-        Compile.__init__(self, config)
+    def __init__(self, config, submission):
+        Compile.__init__(self, config, submission)
         self.exec_string = config.config.get("CompileCommands", "CPP_run")
 
-    def compile(self, submission):
-        basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.code, basename + ".cpp")
+    def compile(self):
+        write_to_disk(self.submission.code, self.codefile)
         self.compile_cmd = self.config.config.get("CompileCommands", "CPP_compile"
-                                             ).replace("%s", basename + ".cpp"
-                                                       ).replace("%e", basename + ".exe")
-        self.exec_string = self.exec_string.replace("%e", basename + ".exe")    
+                                ).replace("%s", self.codefile
+                                    ).replace("%e", self.executable)
+                                    
+        self.exec_string = self.exec_string.replace("%e", self.executable)    
             
         #compiling the submission
-        return Compile.compile(self, submission)
+        return Compile.compile(self)
 
 class Python_Compile(Compile):
-    def __init__(self, config):
-        Compile.__init__(self, config)
+    def __init__(self, config, submission):
+        Compile.__init__(self, config, submission)
         self.exec_string = config.config.get("CompileCommands", "Py_run")
 
-    def compile(self, submission):
-        basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.code, basename + ".py")
+    def compile(self): 
+        write_to_disk(self.submission.code, self.codefile)
         self.compile_cmd = self.config.config.get("CompileCommands", "Py_compile"
-                                                  ).replace("%s", basename + ".py")         
-        self.exec_string = self.exec_string.replace("%s", basename + ".py")
+                                ).replace("%s", self.codefile)         
+        
+        self.exec_string = self.exec_string.replace("%s", self.codefile)
             
         #compiling the submission
-        return Compile.compile(self, submission)
+        return Compile.compile(self)
 
 class Pascal_Compile(Compile):
     def __init__(self, config):
         Compile.__init__(self, config)
         self.exec_string = config.config.get("CompileCommands", "Pascal_run")
 
-    def compile(self, submission):
-        basename = self.config.runpath + str(submission.pk) 
-        write_to_disk(submission.code, basename + ".p")
+    def compile(self): 
+        write_to_disk(self.submission.code, self.codefile)
         self.compile_cmd = self.config.config.get("CompileCommands", "Pascal_compile"
-                                                  ).replace("%s", basename + ".p"
-                                                            ).replace("%e", basename + ".exe")
-        self.exec_string = self.exec_string.replace("%e", basename + ".exe")    
+                                ).replace("%s", self.codefile
+                                    ).replace("%e", self.executable)
+                                    
+        self.exec_string = self.exec_string.replace("%e", self.executable)    
 
         #compiling the submission
-        return Compile.compile(self, submission)             
+        return Compile.compile(self)             
 
 class Java_Compile(Compile):
     #Source code is written onto Main.java and the classname is expected to be Main
