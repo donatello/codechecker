@@ -36,26 +36,26 @@ int main(int argc, char* argv[]) {
 /* Usage: setuid_helper debug=<bool> timelimit=<secs> memlimit=<MB>
   maxfilesize=<MB> infile=<name> outfile=<name> errfile=<name> testcaseid=<tid> submissionid=<subid> <submission-exec>
   No error checking done, since this will be run only by the Code checker. */
-  int c;
+  int c, ret, is_jail = 0;
   int debug, timelimit, memlimit, maxfilesz, testcaseid, submissionid;
   char infile[MAX_PATH_LEN], outfile[MAX_PATH_LEN], errfile[MAX_PATH_LEN], exec_string[MAX_PATH_LEN], jail[MAX_PATH_LEN];
+  char cur_dir[MAX_PATH_LEN], *new_dir = NULL;
   char *targv[MAX_ARGS];
   int cnt = 0;
+  jail[0] = '\0';
   while(1) {
     static struct option long_options[] =
       {
           /* These options set a flag. */
-          {"debug",  required_argument, 0, 0},
+          {"debug",  optional_argument, 0, 0},
           {"timelimit",  required_argument, 0, 0},
           {"memlimit",  required_argument, 0, 0},
           {"maxfilesz",  required_argument, 0, 0},
-          {"testcaseid",  required_argument, 0, 0},
-          {"submissionid",  required_argument, 0, 0},
           {"infile",  required_argument, 0, 0},
           {"outfile",  required_argument, 0, 0},
           {"errfile",  required_argument, 0, 0},
+          {"jail", optional_argument, 0 ,0},
           {"executable",  required_argument, 0, 0},
-          {"jail", required_argument, 0 ,0},
           {0, 0, 0, 0}
       };
     int option_index = 0;
@@ -79,25 +79,20 @@ int main(int argc, char* argv[]) {
           case 3: maxfilesz = atoi(optarg);
                   break;
 
-          case 4: testcaseid = atoi(optarg);
+          case 4: strcpy(infile, optarg);
                   break;
 
-          case 5: submissionid = atoi(optarg);
+          case 5: strcpy(outfile, optarg);
                   break;
 
-          case 6: strcpy(infile, optarg);
+          case 6: strcpy(errfile, optarg);
                   break;
 
-          case 7: strcpy(outfile, optarg);
+          case 7: strcpy(jail, optarg);
+                  is_jail = 1;
                   break;
 
-          case 8: strcpy(errfile, optarg);
-                  break;
-
-          case 9: strcpy(jail,optarg);
-				  break;
-
-          case 10: strcpy(exec_string, optarg);
+          case 8: strcpy(exec_string, optarg);
                   //demarshall the executable optarg into argv
                   targv[0] = strtok(exec_string, " ");
                   cnt = 1;
@@ -105,13 +100,6 @@ int main(int argc, char* argv[]) {
                   break;
         }
 
-         /*   printf("option_index = %d\n", option_index);
-        printf ("option %s", long_options[option_index].name);
-
-        if (optarg)
-          printf (" with arg %s", optarg);
-        printf ("\n");
-        */
       
         break;
       default:; 
@@ -127,20 +115,32 @@ int main(int argc, char* argv[]) {
     freopen(errfile, "w", stderr);
 
     //change to the jail directory
-    chdir(jail);
+    
+    if(is_jail) {
+      getcwd(cur_dir, MAX_PATH_LEN);
+      new_dir = (char*) malloc(strlen(jail)+strlen(cur_dir)+2);
+      strcpy(new_dir, cur_dir);
+      strcat(new_dir, "/");
+      strcat(new_dir, jail);
+      chdir(new_dir);
 
-    //chroot to the jail directory
-    chroot(jail);
-
+      //chroot to the jail directory
+      ret = chroot(new_dir);
+#ifdef DBG
+      FILE *fp = fopen("/chstuff", "a");
+      fprintf(fp, "errno = %d\n", errno);
+      fclose(fp);
+#endif
+      free(new_dir);
+    }
+    
     //drop priveleges
-    //TODO: fetch the uid to run the submission from TestRunner.py
     setuid(1002);    
-
 
     struct rlimit lim ;
     // set limit on number of forks possible.
     lim.rlim_cur = lim.rlim_max = 0; 
-    int ret = setrlimit(RLIMIT_NPROC, &lim);
+    ret = setrlimit(RLIMIT_NPROC, &lim);
 
     lim.rlim_cur = lim.rlim_max = memlimit << 20;
     ret = setrlimit(RLIMIT_AS, &lim);
@@ -152,7 +152,9 @@ int main(int argc, char* argv[]) {
     ret = setrlimit(RLIMIT_FSIZE, &lim);
 
     ret = execvp(targv[0], targv+1); 
-    printf("%s\n", targv[1]);
+#ifdef DBG
+    printf("errno = %d targv[0] = %s\n", errno, targv[0]);
+#endif
     
     //arbitrarily chosen to let parent know that execvp failed; we
     //reach here only if execvp fails
@@ -167,9 +169,10 @@ int main(int argc, char* argv[]) {
   int status;
   struct rusage submission_stats;
 
+  int wait_ret = wait3(&status, 0, &submission_stats);
+#ifdef DBG
   FILE *fp = fopen("/tmp/setuid-helper.debug", "a");
   FILE *fs = fopen("/tmp/stats", "w");
-  int wait_ret = wait3(&status, 0, &submission_stats);
   if(wait_ret != -1)
     fprintf(fs, "%d|%d|%lf\n", testcaseid, submissionid, 
         submission_stats.ru_utime.tv_sec + (1e-6) * submission_stats.ru_utime.tv_usec);
@@ -179,18 +182,19 @@ int main(int argc, char* argv[]) {
     
   if (WIFSIGNALED(status)) {
     if(debug) 
-      fprintf(fp, "submission %s signalled status = %d errno = %d\n", targv[cnt-1], WTERMSIG(status), errno);
+      fprintf(fp, "submission %s signalled status = %d errno = %d\n", exec_string, WTERMSIG(status), errno);
     return WTERMSIG(status);
   }
   if (WIFEXITED(status)) {
     if(debug) 
-      fprintf(fp, "child %s exited normally with status = %d errno = %d\n", targv[cnt-1], WEXITSTATUS(status), errno);
+      fprintf(fp, "child %s exited normally with status = %d errno = %d\n", exec_string, WEXITSTATUS(status), errno);
     return WEXITSTATUS(status);
   }
   if(debug) 
     fprintf(fp, "child %s did not exit normally and did not get"
-	    " signalled, exited with status = %d errno = %d\n", targv[cnt-1], status, errno);
+	    " signalled, exited with status = %d errno = %d\n", exec_string, status, errno);
   fclose(fp);
   fclose(fs);
+#endif
   return status;
 }
