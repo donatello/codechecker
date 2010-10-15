@@ -1,0 +1,2 @@
+class Compile:
+    pass
