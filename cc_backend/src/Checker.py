@@ -5,7 +5,7 @@ import string
 import time
 import threading
 
-from store.default_storage import Default
+from store.default_store import Default
 from evaluator.eval import Evaluate
 from compiler.compile import Compiler
 from score.score import Score

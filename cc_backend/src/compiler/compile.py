@@ -2,7 +2,7 @@ import subprocess
 import os.path
 
 
-class Compile:
+class Compiler:
     def __init__(self, config):
         self.config = config
 
@@ -36,7 +36,7 @@ class Compile:
             return Java_Compiler(self.config)
 
 
-class C_Compile:
+class C_Compiler:
     """
     This is a language specific compiler class. It needs all the
     methods needed below below.
