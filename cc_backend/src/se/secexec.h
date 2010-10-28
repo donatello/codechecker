@@ -17,8 +17,11 @@
 
 struct _ExecArgs {
   int timelimit, memlimit, maxfilesz;
-  char *infile, *outfile, *errfile,
-       *jailroot, *execname;
+  char infile[MAX_PATH_LEN];
+  char outfile[MAX_PATH_LEN];
+  char errfile[MAX_PATH_LEN];
+  char jailroot[MAX_PATH_LEN];
+  char execname[MAX_PATH_LEN];
 };
 
 typedef struct _ExecArgs ExecArgs;

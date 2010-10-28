@@ -34,13 +34,13 @@ int secure_spawn(ExecArgs ea) {
 
       //chroot to the jail directory
       ret = chroot(new_dir);
-#ifdef DBG
+#ifdef JAIL
       FILE *fp = fopen("./chstuff", "a");
       if(fp) {
-        fprintf(fp, "errno = %d\n", errno);
+        fprintf(fp, "euid = %d ret = %d errno = %d\n", geteuid(), ret, errno);
         fclose(fp);
       }
-#endif
+#endif /* JAIL */
       free(new_dir);
     }
     
@@ -94,6 +94,88 @@ int secure_spawn(ExecArgs ea) {
 	    " signalled, exited with status = %d errno = %d\n", ea.execname, status, errno);
   fclose(fp);
   fclose(fs);
-#endif
+#endif /* DBG */
   return status;
 }
+
+int main (int argc, char **argv) {
+  int c;
+  ExecArgs ea;
+
+   while (1) {
+        int this_option_optind = optind ? optind : 1;
+        int option_index = 0;
+        static struct option long_options[] = {
+            {"infile", required_argument, 0, 0},
+            {"outfile", required_argument, 0, 0},
+            {"errfile", required_argument, 0, 0},
+            {"jailroot", required_argument, 0, 0},
+            {"executable", required_argument, 0, 0},
+            {"timelimit", required_argument, 0, 0},
+            {"memlimit", required_argument, 0, 0},
+            {"maxfilesz", required_argument, 0, 0},
+            {0, 0, 0, 0}
+        };
+
+       c = getopt_long (argc, argv, "",
+                 long_options, &option_index);
+        if (c == -1)
+            break;
+
+       switch (c) {
+        case 0:
+
+#ifdef GETOPT
+            printf ("option %s", long_options[option_index].name);
+            if (optarg)
+                printf (" with arg %s", optarg);
+            printf ("\n");
+#endif /*GETOPT*/
+
+            switch(option_index) {
+              case 0:
+                strcpy(ea.infile, optarg);
+                break;
+
+              case 1:
+                strcpy(ea.outfile, optarg);
+                break;
+
+              case 2:
+                strcpy(ea.errfile, optarg);
+                break;
+
+              case 3:
+                strcpy(ea.jailroot, optarg);
+                break;
+
+              case 4:
+                strcpy(ea.execname, optarg);
+                break;
+
+              case 5: 
+                ea.timelimit = atoi(optarg);
+                break;
+
+              case 6:
+                ea.memlimit = atoi(optarg);
+                break;
+
+              case 7: 
+                ea.maxfilesz = atoi(optarg);
+                break;
+
+              default: 
+                break;
+              
+            }
+            break;
+
+        }
+    } /* option parsing ends */
+
+   int return_status = secure_spawn(ea);
+
+   return return_status;
+}
+  
