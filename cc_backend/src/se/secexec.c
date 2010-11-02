@@ -15,37 +15,28 @@ int secure_spawn(ExecArgs ea) {
   char *targv[2] = {NULL, NULL}; /* dummy second arg for execvp */
     
 
-  // fork argv[1]
   p = fork();
   if (!p) { 
     freopen(ea.infile, "r", stdin); 
     freopen(ea.outfile, "w", stdout);
     freopen(ea.errfile, "w", stderr);
 
-    //change to the jail directory
+    /* jailroot is expressed in absolute pathname terms.*/
     
-    if(strcmp(ea.jailroot, "")) {
-      getcwd(cur_dir, MAX_PATH_LEN);
-      new_dir = (char*) malloc(strlen(ea.jailroot)+strlen(cur_dir)+2);
-      strcpy(new_dir, cur_dir);
-      strcat(new_dir, "/");
-      strcat(new_dir, ea.jailroot);
-      chdir(new_dir);
-
-      //chroot to the jail directory
-      ret = chroot(new_dir);
+    chdir(ea.jailroot);
+    char *curdir = getcwd(NULL, 0);
+    ret = chroot(curdir);
+    free(curdir);
 #ifdef JAIL
-      FILE *fp = fopen("./chstuff", "a");
-      if(fp) {
-        fprintf(fp, "euid = %d ret = %d errno = %d\n", geteuid(), ret, errno);
-        fclose(fp);
-      }
-#endif /* JAIL */
-      free(new_dir);
+    FILE *fp = fopen("./chstuff", "a");
+    if(fp) {
+      fprintf(fp, "euid = %d ret = %d errno = %d\n", geteuid(), ret, errno);
+      fclose(fp);
     }
+#endif /* JAIL */
     
     //drop priveleges
-    setuid(1002);    
+    setuid(ea.euid);    
 
     struct rlimit lim ;
     // set limit on number of forks possible.
@@ -111,6 +102,7 @@ int main (int argc, char **argv) {
             {"errfile", required_argument, 0, 0},
             {"jailroot", required_argument, 0, 0},
             {"executable", required_argument, 0, 0},
+            {"euid", required_argument, 0, 0},
             {"timelimit", required_argument, 0, 0},
             {"memlimit", required_argument, 0, 0},
             {"maxfilesz", required_argument, 0, 0},
@@ -154,14 +146,18 @@ int main (int argc, char **argv) {
                 break;
 
               case 5: 
+                ea.euid = atoi(optarg);
+                break;
+
+              case 6: 
                 ea.timelimit = atoi(optarg);
                 break;
 
-              case 6:
+              case 7:
                 ea.memlimit = atoi(optarg);
                 break;
 
-              case 7: 
+              case 8: 
                 ea.maxfilesz = atoi(optarg);
                 break;
 

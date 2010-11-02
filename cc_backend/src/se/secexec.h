@@ -16,7 +16,8 @@
 #define MAX_ARGS 20
 
 struct _ExecArgs {
-  int timelimit, memlimit, maxfilesz;
+  int timelimit, memlimit, maxfilesz,
+      euid;
   char infile[MAX_PATH_LEN];
   char outfile[MAX_PATH_LEN];
   char errfile[MAX_PATH_LEN];
