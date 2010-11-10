@@ -38,7 +38,7 @@ def main():
 
         # compile the submission
         compiler_res = compiler.compile_source(submission["src_file"])
-        if compiler_res.retcode == 0:
+        if compiler_res["retcode"] == 0:
             store.set_compile_status("COMPILED", err_msg=None,
                                      sub_id=submission["id"])
         else:
@@ -53,7 +53,7 @@ def main():
         test_group_scores = []
         for test_grp in store.get_test_group(submission["prob_id"]):
             result_set = evaluator.eval_submission(submission,
-                                                   test_grp)
+                                                   test_grp, compiler_res["run_cmd"])
             test_grp_score = score.score_group(prob_id,
                                                result_set)
             store.set_test_group_score(test_grp_score,
