@@ -78,6 +78,10 @@ class Store:
 
              "testgroup_id" : "string id for testgroup",
 
+             "timelimit" : "time limit for a submisson for this testgroup",
+
+             "memlimit" : "time limit for a submisson for this testgroup",
+
              "input_files" : [list of input file names],
 
              "output_files" : [list of corresponding reference output
