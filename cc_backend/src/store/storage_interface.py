@@ -82,7 +82,9 @@ class Store:
 
              "memlimit" : "time limit for a submisson for this testgroup",
 
-             "input_files" : [list of input file names],
+             "input_files" : [list of input file names] each of the form 
+                                submission_id.in and corresponding outfile
+                                and errfile would be submission_id.{out, err},
 
              "output_files" : [list of corresponding reference output
                               file names] or None if a separate
