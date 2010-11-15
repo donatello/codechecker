@@ -80,7 +80,7 @@ class Store:
 
              "timelimit" : "time limit for a submisson for this testgroup",
 
-             "memlimit" : "time limit for a submisson for this testgroup",
+             "memlimit" : "memory limit for a submisson for this testgroup",
 
              "input_files" : [list of input file names] each of the form 
                                 submission_id.in and corresponding outfile
