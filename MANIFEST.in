@@ -1,0 +1,2 @@
+exclude cc_backend/src/Checker.py
+exclude cc_backend/src/Config.py
