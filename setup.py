@@ -10,9 +10,18 @@ setup(name='codechecker',
       license='GPLv3',
       url='http://code.google.com/p/codechecker',
       platforms='All',
-      packages=['cc_backend', 'cc_backend.compiler', 'cc_backend.evaluator',
-                'cc_backend.score', 'cc_backend.se', 'cc_backend.store'],
-      package_dir={'cc_backend' : 'cc_backend/src'}
+      packages=['checker',
+                'checker.cc_backend', 
+                'checker.cc_backend.compiler', 
+                'checker.cc_backend.evaluator',
+                'checker.cc_backend.score', 
+                'checker.cc_backend.se', 
+                'checker.cc_backend.store',
+                'checker.cc_frontend',
+                'checker.cc_frontend.views',
+                'checker.cc_frontend.forms'
+                ],
+      package_dir={'checker' : 'src'}
       )
 
 
