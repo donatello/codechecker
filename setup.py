@@ -21,7 +21,7 @@ setup(name='codechecker',
                 'checker.cc_frontend.views',
                 'checker.cc_frontend.forms'
                 ],
-      package_dir={'checker' : 'src'}
+      package_dir={'checker' : 'src/checker'}
       )
 
 
