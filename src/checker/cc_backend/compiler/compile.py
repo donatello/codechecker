@@ -8,7 +8,7 @@ class Compiler:
 
     def compile_source(self, source_filepath, lang=None):
         compiler = self.get_compiler(source_filepath, lang)
-        compiler.get_compile_cmd(source_filepath)
+        compile_cmd = compiler.get_compile_cmd(source_filepath)
         print compile_cmd
         child = subprocess.Popen(compile_cmd, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE, shell=True)
@@ -54,3 +54,13 @@ class C_Compiler:
     def get_run_cmd(self, source_path):
         basename = os.path.join(self.config.abs_path, str(submission.ph))
         return self.exec_string.replace("%e", basename + ".exe")
+
+#TODO: Things were breaking here
+class CPP_Compiler:
+    pass
+
+class Py_Compiler:
+    pass
+
+class Java_Compiler:
+    pass
