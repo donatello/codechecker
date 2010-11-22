@@ -3,7 +3,7 @@ import os
 import subprocess
 import se.secexec
 class Evaluate:
-    def eval_submission(submission, test_grp, submission_exec):
+    def eval_submission(self, submission, test_grp, submission_exec):
         """Takes submission and test_grp and returns result_set"""
         tlimit = test_grp["timelimit"]
         mlimit = test_grp["memlimit"]
