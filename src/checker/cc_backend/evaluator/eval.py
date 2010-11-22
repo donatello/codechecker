@@ -1,7 +1,7 @@
 from os.path import splitext
 import os
 import subprocess
-import se.secexec
+import checker.cc_backend.se.secexec as secexec
 class Evaluate:
     def eval_submission(self, submission, test_grp, submission_exec):
         """Takes submission and test_grp and returns result_set"""
@@ -26,7 +26,7 @@ class Evaluate:
                                         #to send the euid to use here
                     "--jailroot=%s" % jailroot]
             args.insert(0, curdir + "/secexec")
-            ret_code = se.secexec.secure_spawn(args) 
+            ret_code = secexec.secure_spawn(args) 
             #End of executing the submission_exec
             if test_grp["is_cust_scored"] == True:
                 #TODO: run cust_execute via secure_spawn 
