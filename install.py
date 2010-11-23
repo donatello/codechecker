@@ -63,6 +63,10 @@ shutil.copy( os.path.join( os.getcwd(), 'conf/django.conf'),
 # Now to run syncdb - settings should already be in place
 # It would not have come to this level else
 # currently running manage.py syndb, how to call it here ?
+
 # TODO: call manage.py syncdb from here 
-
-
+# TODO: add django.conf to apache's include directory
+# TODO: copy media to /usr/share/checker/media - DOcRoot has already added
+# TODO: Default populate
+# TODO: Run a Unit test 
+# TODO: Run setuid generation - secexec.o 
