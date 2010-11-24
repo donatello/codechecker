@@ -77,7 +77,7 @@ class Problem(models.Model):
 
 class TestSet(models.Model):
     problem = models.ForeignKey(Problem)
-    maxScore = models.IntegerField()
+    score = models.IntegerField()
     tlimit = models.IntegerField(verbose_name = "Time Limit") # (in seconds)
     mlimit = models.IntegerField(verbose_name = "Memory Limit") # (in MiB)
     is_cust_scored = models.BooleanField(default = False, 
