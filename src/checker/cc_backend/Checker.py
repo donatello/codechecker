@@ -15,8 +15,8 @@ from Config import Config
 def main():
 
     config = Config("conf/codechecker.conf")
-    store = Default()
-    evaluator = Evaluate()
+    store = Default(config)
+    evaluator = Evaluate(config)
     compiler = Compiler(config)
     score = Score()
 

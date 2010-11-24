@@ -3,12 +3,15 @@ import os
 import subprocess
 import checker.cc_backend.se.secexec as secexec
 class Evaluate:
+    def __init__(self, config):
+        self.config = config
+
     def eval_submission(self, submission, test_grp, submission_exec):
         """Takes submission and test_grp and returns result_set"""
         tlimit = test_grp["timelimit"]
         mlimit = test_grp["memlimit"]
         maxfilesz = 32 #TODO: for now we fix it at 32M
-        jailroot = "jail" #FIXME: Need to lay down the exec env
+        jailroot = self.config.abs_path 
 
         #Assumption: each infile would be of the form submission_id.in
         for infile in test_grp["input_files"]:
@@ -33,7 +36,6 @@ class Evaluate:
                 #with appropriate infile and outfile
                 pass
             else:
-                #TODO: perform a diff 
                 check = subprocess.Popen('diff -Bb ' + outfile + ' ' + test_grp["input_file"], shell=True,
                                      stdout=subprocess.PIPE)
                 diff_op = check.communicate()[0]
