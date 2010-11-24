@@ -18,8 +18,7 @@ setup(name='codechecker',
                 'checker.cc_backend.se', 
                 'checker.cc_backend.store',
                 'checker.cc_frontend',
-                'checker.cc_frontend.views',
-                'checker.cc_frontend.forms'
+                'checker.cc_frontend.web',
                 ],
       package_dir={'checker' : 'src/checker'}
       )

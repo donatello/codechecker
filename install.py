@@ -9,7 +9,8 @@ from django.core.management import execute_manager
 
 prefix = "/usr/local/"
 backend_conf = prefix + 'etc/checker/'
-frontend_conf = prefix + 'etc/apache/' 
+frontend_conf = prefix + 'etc/apache/'
+media_dir = prefix + 'share/checker/' 
 
 #check if django exists first
 try :
@@ -51,6 +52,10 @@ if not os.path.exists( backend_conf ):
 if not os.path.exists( frontend_conf ):
     os.mkdir( frontend_conf )
 
+# create media directory
+if not os.path.exists( media_dir ) :
+    os.mkdir( media_dir )
+
 #copy the codechecker.conf to @prefix/etc/checker
 shutil.copy( os.path.join( os.getcwd(), 'conf/codechecker.conf'), 
             os.path.join( backend_conf, 'codechecker.conf' ) )
@@ -59,6 +64,21 @@ shutil.copy( os.path.join( os.getcwd(), 'conf/codechecker.conf'),
 shutil.copy( os.path.join( os.getcwd(), 'conf/django.conf'), 
             os.path.join( frontend_conf, 'django.conf') )
 
+#copy the media folder to /usr/share/checker/media
+# and remove it if already present 
+if os.path.exists( media_dir + 'media/'):
+    shutil.rmtree( media_dir + 'media/' )
+
+if os.path.exists( '/var/www/media/' ):
+    shutil.rmtree('/var/www/media/')
+    exit(1)
+
+shutil.copytree(os.getcwd() + '/media', 
+                media_dir + 'media/' )
+
+#this is a temporary copy to /www/media
+shutil.copytree(os.getcwd() + '/media', 
+                '/var/www/media/' )
 
 # Now to run syncdb - settings should already be in place
 # It would not have come to this level else

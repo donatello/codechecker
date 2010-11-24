@@ -24,7 +24,7 @@ DATABASE_NAME = config.get('database', 'DATABASE_NAME')
 DATABASE_USER = config.get('database', 'DATABASE_USER')   
 DATABASE_PASSWORD = config.get('database', 'DATABASE_PASSWORD')
 
-ROOT_URLCONF = 'checker.cc_frontend.root_url'
+ROOT_URLCONF = 'checker.cc_frontend.urls'
 TEMPLATE_DIRS = ( 
     os.path.join( os.getcwd(), 'templates/')
  )
@@ -37,7 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'checker.cc_frontend'
+    'django.contrib.admindocs',
+    'cc_frontend.web'
  )
 
 # codechecker based custom config
