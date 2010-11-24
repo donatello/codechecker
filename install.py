@@ -33,16 +33,6 @@ python-mysqldb is not installed. Please install from apt/yum\n
 ---------------------------------------------------------------------------
 ''' )
     exit(1)
-    
-#Copy the settings.py from sample file and ask to populate the mysql data
-shutil.copy( os.path.join( os.getcwd(), 'conf/settings.conf' ),
-             os.path.join( backend_conf, 'settings.conf' ) )
-
-# copy all python modules
-ret_code = os.system( "python setup.py install" )
-if not ret_code == 0 :
-    sys.exit(ret_code)
-
 
 # create etc/checker conf directory if not exists already 
 if not os.path.exists( backend_conf ):
@@ -55,6 +45,16 @@ if not os.path.exists( frontend_conf ):
 # create media directory
 if not os.path.exists( media_dir ) :
     os.mkdir( media_dir )
+    
+#Copy the settings.py from sample file and ask to populate the mysql data
+shutil.copy( os.path.join( os.getcwd(), 'conf/settings.conf' ),
+             os.path.join( backend_conf, 'settings.conf' ) )
+
+# copy all python modules
+ret_code = os.system( "python setup.py install" )
+if not ret_code == 0 :
+    sys.exit(ret_code)
+
 
 #copy the codechecker.conf to @prefix/etc/checker
 shutil.copy( os.path.join( os.getcwd(), 'conf/codechecker.conf'), 
