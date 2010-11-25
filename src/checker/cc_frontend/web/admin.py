@@ -26,7 +26,7 @@ class ProblemAdmin(admin.ModelAdmin):
         ( 'Display', {
             'classes': ('wide'),
             'fields' : ('statement', 'constraints', 'scoring_info', 
-                'sampleInput', 'sampleOutput', ),
+                'penalty', 'sampleInput', 'sampleOutput', ),
         }),
         ( 'Constraints', {
             'classes': ('wide'),
